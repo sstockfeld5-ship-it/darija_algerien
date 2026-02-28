@@ -32,7 +32,6 @@
             margin-bottom: 20px;
         }
         
-        /* Sélecteur de leçon */
         #lesson-selector {
             width: 100%;
             padding: 12px;
@@ -46,9 +45,7 @@
             cursor: pointer;
             outline: none;
         }
-        #lesson-selector:focus {
-            box-shadow: 0 0 5px rgba(0, 102, 51, 0.5);
-        }
+        #lesson-selector:focus { box-shadow: 0 0 5px rgba(0, 102, 51, 0.5); }
 
         .tabs {
             display: flex;
@@ -173,7 +170,7 @@
     <div class="container">
         
         <select id="lesson-selector" onchange="changeLesson()">
-            <option value="2">📖 Leçon 2 (Nouveau !)</option>
+            <option value="2">📖 Leçon 2</option>
             <option value="1">📖 Leçon 1</option>
             <option value="all">📚 Toutes les leçons mélangées</option>
         </select>
@@ -210,8 +207,9 @@
         </div>
     </div>
 
+    <audio id="audio-player" style="display:none;"></audio>
+
     <script>
-        // Base de données unifiée avec les leçons 1 et 2
         const allLessonData = [
             // --- LEÇON 1 ---
             { ar: "أنا", tr: "ana", fr: "Je", tts: "أَنَا", type: "mot", lesson: 1 },
@@ -260,23 +258,19 @@
         let currentQuestion = null;
         let scoreTrad = 0, totalTrad = 0;
         let scoreAudio = 0, totalAudio = 0;
-        let currentAudioObject = null; 
+        
+        // On récupère le lecteur audio pré-créé dans le HTML
+        const audioPlayer = document.getElementById('audio-player');
 
-        // Fonction pour mettre à jour les données selon la leçon choisie
         function changeLesson() {
             const selector = document.getElementById('lesson-selector');
             const choice = selector.value;
-            
             if (choice === "all") {
                 activeData = [...allLessonData];
             } else {
                 activeData = allLessonData.filter(item => item.lesson == choice);
             }
-            
-            // On recharge la vue actuelle
             renderVocab();
-            
-            // On remet les scores à zéro et on relance les quiz si on change de leçon
             startTradQuiz();
             startAudioQuiz();
         }
@@ -320,14 +314,21 @@
         }
 
         function playAudio(text) {
-            if (currentAudioObject) {
-                currentAudioObject.pause();
-                currentAudioObject.currentTime = 0;
-            }
+            // 1ère étape : On essaie avec l'audio de Google via notre balise <audio> (Meilleure qualité)
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(text)}`;
-            currentAudioObject = new Audio(url);
-            currentAudioObject.play().catch(error => {
-                console.log("Lecture audio impossible", error);
+            audioPlayer.src = url;
+            
+            audioPlayer.play().catch(error => {
+                // 2ème étape : Si l'iPhone bloque le son web, on bascule direct sur la voix interne du téléphone
+                console.log("Audio web bloqué, passage à la voix native d'iOS.");
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel(); // Coupe tout son précédent
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'ar-SA';
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    alert("Le son est bloqué. Vérifie que ton iPhone n'est pas en mode silencieux !");
+                }
             });
         }
 
@@ -337,8 +338,6 @@
 
         function getOptions(correctItem) {
             let options = [correctItem];
-            // On pioche les mauvaises réponses dans TOUTE la base pour que ce soit plus dur,
-            // mais on garde le même type (mot vs phrase).
             let distractors = allLessonData.filter(item => item.type === correctItem.type && item !== correctItem);
             distractors.sort(() => Math.random() - 0.5);
             if (distractors.length > 0) options.push(distractors[0]);
@@ -428,7 +427,6 @@
             document.getElementById(`total-${type}`).innerText = total;
         }
 
-        // Initialisation au lancement de la page
         changeLesson();
     </script>
 </body>
