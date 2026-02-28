@@ -10,6 +10,7 @@
             --secondary: #D21034;
             --light: #f4f4f4;
             --dark: #333;
+            --highlight: #e6f9ed;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -30,10 +31,9 @@
             max-width: 600px;
             width: 100%;
             margin-bottom: 20px;
-            display: none; /* Caché jusqu'à l'activation */
+            display: none; /* Caché jusqu'à l'activation pour iOS */
         }
         
-        /* Bouton d'activation iOS */
         #start-screen {
             display: flex;
             flex-direction: column;
@@ -100,12 +100,20 @@
             padding-bottom: 5px;
             margin-top: 25px;
         }
+        
+        /* Liste Vocabulaire */
         .vocab-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px;
             border-bottom: 1px solid #eee;
+            border-left: 4px solid transparent;
+            transition: 0.3s;
+        }
+        .vocab-item.highlight {
+            background-color: var(--highlight);
+            border-left: 4px solid var(--primary);
         }
         .vocab-text { display: flex; flex-direction: column; }
         .arabe {
@@ -131,6 +139,8 @@
             -webkit-tap-highlight-color: transparent;
         }
         button.audio-btn:active { opacity: 0.7; }
+        
+        /* Quiz */
         .question-text {
             font-size: 1.2em;
             margin-bottom: 20px;
@@ -175,8 +185,9 @@
         button.option-btn.wrong { background: var(--secondary); color: white; border-color: var(--secondary); }
         button.option-btn .arabe { margin-bottom: 5px; }
         .score-container { text-align: center; margin-top: 15px; font-weight: bold; }
-        .next-btn {
-            display: none;
+        
+        /* Boutons d'action larges */
+        .action-btn {
             width: 100%;
             padding: 12px;
             margin-top: 15px;
@@ -188,6 +199,8 @@
             font-size: 1.1em;
             font-weight: bold;
         }
+        #stop-all-btn { background: var(--secondary); }
+        #play-all-btn { background: #005bb5; }
         .empty-state { text-align: center; color: gray; font-style: italic; padding: 20px; }
     </style>
 </head>
@@ -203,6 +216,7 @@
     <div class="container" id="main-app">
         
         <select id="lesson-selector" onchange="changeLesson()">
+            <option value="3">📖 Leçon 3</option>
             <option value="2">📖 Leçon 2</option>
             <option value="1">📖 Leçon 1</option>
             <option value="all">📚 Toutes les leçons mélangées</option>
@@ -215,7 +229,11 @@
         </div>
 
         <div id="vocab" class="section active">
-            <p style="text-align: center; font-size: 0.9em; color: gray;"><i>Clique sur l'icône 🔊 pour écouter.</i></p>
+            <button id="play-all-btn" class="action-btn" onclick="startPlayAll()">🎧 Écouter & Répéter la leçon</button>
+            <button id="stop-all-btn" class="action-btn" style="display: none;" onclick="stopPlayAll()">⏹️ Arrêter la lecture</button>
+            
+            <p style="text-align: center; font-size: 0.9em; color: gray; margin-top: 15px;"><i>Clique sur l'icône 🔊 pour écouter un mot précis.</i></p>
+            
             <h2>Mots de base</h2>
             <div id="vocab-mots"></div>
             <h2>Phrases complètes</h2>
@@ -225,7 +243,7 @@
         <div id="quiz-trad" class="section">
             <div class="question-text" id="question-trad"></div>
             <div class="options" id="options-trad"></div>
-            <button class="next-btn" id="next-btn-trad" onclick="nextTradQuestion()">Question suivante ➡️</button>
+            <button class="action-btn" id="next-btn-trad" style="display:none;" onclick="nextTradQuestion()">Question suivante ➡️</button>
             <div class="score-container">Score : <span id="score-trad">0</span> / <span id="total-trad">0</span></div>
         </div>
 
@@ -235,7 +253,7 @@
                 Écoute et choisis la bonne traduction :
             </div>
             <div class="options" id="options-audio"></div>
-            <button class="next-btn" id="next-btn-audio" onclick="nextAudioQuestion()">Question suivante ➡️</button>
+            <button class="action-btn" id="next-btn-audio" style="display:none;" onclick="nextAudioQuestion()">Question suivante ➡️</button>
             <div class="score-container">Score : <span id="score-audio">0</span> / <span id="total-audio">0</span></div>
         </div>
     </div>
@@ -243,7 +261,6 @@
     <audio id="audio-player" style="display:none;"></audio>
 
     <script>
-        // La base de données complète avec le paramètre "tts" (arabe + Soukoun)
         const allLessonData = [
             // --- LEÇON 1 ---
             { ar: "أنا", tr: "ana", fr: "Je", tts: "أَنَا", type: "mot", lesson: 1 },
@@ -284,7 +301,23 @@
             { ar: "أنا مانهضرش دارجة دزايرية", tr: "ana ma nahdarsh darja dziri’ya", fr: "Je ne parle pas darja algérien", tts: "أَنَا مَانَهْدَرْشْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
             { ar: "أنا مانهضرش فرونصي", tr: "ana ma nahdarsh fransè", fr: "Je ne parle pas français", tts: "أَنَا مَانَهْدَرْشْ فْرُونْصِي", type: "phrase", lesson: 2 },
             { ar: "أنا مانهضرش أونگلي", tr: "ana ma nahdarsh anglè", fr: "Je ne parle pas anglais", tts: "أَنَا مَانَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 },
-            { ar: "إنتا ماتهضرش أونگلي", tr: "enta ma tahdarsh anglè", fr: "Tu ne parles pas anglais (homme)", tts: "إِنْتَا مَاتَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 }
+            { ar: "إنتا ماتهضرش أونگلي", tr: "enta ma tahdarsh anglè", fr: "Tu ne parles pas anglais (homme)", tts: "إِنْتَا مَاتَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 },
+
+            // --- LEÇON 3 ---
+            { ar: "مليح", tr: "mlyeh", fr: "Bien / Bon", tts: "مْلِيحْ", type: "mot", lesson: 3 },
+            { ar: "أنا نحب", tr: "ana nhab", fr: "J'aime", tts: "أَنَا نْحَبْ", type: "mot", lesson: 3 },
+            { ar: "إنتا تحب", tr: "enta thab", fr: "Tu aimes (homme)", tts: "إِنْتَا تْحَبْ", type: "mot", lesson: 3 },
+            { ar: "إنتي تحبي", tr: "enti thabi", fr: "Tu aimes (femme)", tts: "إِنْتِي تْحَبِّي", type: "mot", lesson: 3 },
+            { ar: "إنتما", tr: "entouma", fr: "Vous", tts: "إِنْتُمَا", type: "mot", lesson: 3 },
+            { ar: "أنا نهضر فرونصي مليح", tr: "ana nahdar fransè mlyeh", fr: "Je parle bien français", tts: "أَنَا نَهْدَرْ فْرُونْصِي مْلِيحْ", type: "phrase", lesson: 3 },
+            { ar: "أنا مانهضرش مليح فرونصي", tr: "ana ma nahdarsh mlyeh fransè", fr: "Je ne parle pas bien français", tts: "أَنَا مَانَهْدَرْشْ مْلِيحْ فْرُونْصِي", type: "phrase", lesson: 3 },
+            { ar: "إنتا تتعلم دارجة دزايرية", tr: "enta tata'alam darja dziri'ya", fr: "Tu apprends le darja algérien (homme)", tts: "إِنْتَا تْتْعَلَّمْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 3 },
+            { ar: "إنتي تتعلمي دارجة دزايرية", tr: "enti tata'alami darja dziri'ya", fr: "Tu apprends le darja algérien (femme)", tts: "إِنْتِي تْتْعَلَّمِي دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 3 },
+            { ar: "إنتما تهضرو مليح دارجة دزايرية", tr: "entouma tahdro mlyeh darja dziri'ya", fr: "Vous parlez bien darja algérien", tts: "إِنْتُمَا تَهْدْرُوا مْلِيحْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 3 },
+            { ar: "إنتيا تهضري مليح فرونصي", tr: "entia tahdri mlyeh fransè", fr: "Tu parles bien français (femme)", tts: "إِنْتِيَا تَهْدْرِي مْلِيحْ فْرُونْصِي", type: "phrase", lesson: 3 },
+            { ar: "أنا نحب نهضر دارجة دزايرية", tr: "ana nhab nahdar darja dziri'ya", fr: "J'aime parler darja algérien", tts: "أَنَا نْحَبْ نَهْدَرْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 3 },
+            { ar: "أنا نحب نتعلم", tr: "ana nhab nata'alam", fr: "J'aime apprendre", tts: "أَنَا نْحَبْ نْتْعَلَّمْ", type: "phrase", lesson: 3 },
+            { ar: "أنا نحب نهضر", tr: "ana nhab nahdar", fr: "J'aime parler", tts: "أَنَا نْحَبْ نَهْدَرْ", type: "phrase", lesson: 3 }
         ];
 
         let activeData = [];
@@ -292,20 +325,16 @@
         let scoreTrad = 0, totalTrad = 0;
         let scoreAudio = 0, totalAudio = 0;
         
+        let isPlayingAll = false;
+        let playIndex = 0;
+        let sequenceTimeout = null;
+        
         const audioPlayer = document.getElementById('audio-player');
 
-        // Fonction pour débloquer l'audio sur iOS
         function initApp() {
-            // Débloque l'élément HTML <audio>
             audioPlayer.play().catch(e => console.log("Init audio player silent error"));
             audioPlayer.pause();
             
-            // Débloque l'API SpeechSynthesis (au cas où on en a besoin)
-            if ('speechSynthesis' in window) {
-                let msg = new SpeechSynthesisUtterance('');
-                window.speechSynthesis.speak(msg);
-            }
-
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             
@@ -313,27 +342,98 @@
         }
 
         function playAudio(ttsText) {
-            // On utilise l'URL Google Translate avec la langue arabe (tl=ar) et le texte avec Soukoun
+            stopPlayAll(); // Arrête la lecture automatique si on clique manuellement
+            
+            audioPlayer.onended = null; // Nettoie les événements de boucle
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(ttsText)}`;
             
             audioPlayer.src = url;
-            audioPlayer.play().catch(error => {
-                console.log("Audio Google bloqué, basculement sur la voix native iOS.");
-                // Si l'URL externe échoue, on bascule sur la voix native de l'iPhone
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(ttsText);
-                    utterance.lang = 'ar-SA'; // Voix arabe
-                    window.speechSynthesis.speak(utterance);
-                }
-            });
+            audioPlayer.play().catch(error => console.log("Erreur de lecture audio"));
         }
 
         function playCurrentAudio() {
             if (currentQuestion) playAudio(currentQuestion.tts);
         }
 
+        // --- NOUVELLE FONCTIONNALITÉ : ÉCOUTER ET RÉPÉTER ---
+        
+        function startPlayAll() {
+            if(activeData.length === 0) return;
+            isPlayingAll = true;
+            playIndex = 0;
+            
+            document.getElementById('play-all-btn').style.display = 'none';
+            document.getElementById('stop-all-btn').style.display = 'block';
+            
+            playSequenceFr();
+        }
+
+        function stopPlayAll() {
+            isPlayingAll = false;
+            audioPlayer.onended = null;
+            audioPlayer.pause();
+            clearTimeout(sequenceTimeout);
+            
+            document.getElementById('play-all-btn').style.display = 'block';
+            document.getElementById('stop-all-btn').style.display = 'none';
+            
+            // Enlève le surlignage de tous les mots
+            document.querySelectorAll('.vocab-item').forEach(el => el.classList.remove('highlight'));
+        }
+
+        function playSequenceFr() {
+            if (!isPlayingAll || playIndex >= activeData.length) {
+                stopPlayAll();
+                return;
+            }
+
+            // Surligne le mot en cours
+            document.querySelectorAll('.vocab-item').forEach(el => el.classList.remove('highlight'));
+            let currentElement = document.getElementById('vocab-item-' + playIndex);
+            if(currentElement) {
+                currentElement.classList.add('highlight');
+                currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            let currentItem = activeData[playIndex];
+            
+            // 1. Joue le mot en Français (tl=fr)
+            const frUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=fr&client=tw-ob&q=${encodeURIComponent(currentItem.fr)}`;
+            audioPlayer.src = frUrl;
+            
+            audioPlayer.onended = function() {
+                if (!isPlayingAll) return;
+                playSequenceAr(currentItem);
+            };
+            audioPlayer.play().catch(e => stopPlayAll());
+        }
+
+        function playSequenceAr(currentItem) {
+            if (!isPlayingAll) return;
+            
+            // 2. Joue le mot en Darja (tl=ar avec Soukoun)
+            const arUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(currentItem.tts)}`;
+            audioPlayer.src = arUrl;
+            
+            audioPlayer.onended = function() {
+                if (!isPlayingAll) return;
+                
+                // 3. Pause (2 secondes ou plus si la phrase est longue)
+                let pauseTime = Math.max(2000, currentItem.tts.length * 120); 
+                
+                sequenceTimeout = setTimeout(() => {
+                    if (!isPlayingAll) return;
+                    playIndex++;
+                    playSequenceFr();
+                }, pauseTime);
+            };
+            audioPlayer.play().catch(e => stopPlayAll());
+        }
+
+        // --- FIN NOUVELLE FONCTIONNALITÉ ---
+
         function changeLesson() {
+            stopPlayAll(); // Arrête l'audio si on change de leçon
             const selector = document.getElementById('lesson-selector');
             const choice = selector.value;
             if (choice === "all") {
@@ -361,9 +461,11 @@
             let hasMots = false;
             let hasPhrases = false;
 
-            activeData.forEach(item => {
+            activeData.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'vocab-item';
+                div.id = 'vocab-item-' + index; // Identifiant unique pour le surlignage
+                
                 div.innerHTML = `
                     <div class="vocab-text">
                         <span class="arabe">${item.ar}</span>
@@ -457,7 +559,6 @@
 
             if (selectedOption === currentQuestion) {
                 button.classList.add('correct');
-                // En cas de bonne réponse, on joue l'audio avec Soukoun
                 if (type === 'trad') playAudio(currentQuestion.tts);
             } else {
                 button.classList.add('wrong');
