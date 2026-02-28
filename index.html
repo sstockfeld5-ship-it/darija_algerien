@@ -31,7 +31,7 @@
             max-width: 600px;
             width: 100%;
             margin-bottom: 20px;
-            display: none; /* Caché jusqu'à l'activation pour iOS */
+            display: none; 
         }
         
         #start-screen {
@@ -186,7 +186,7 @@
         button.option-btn .arabe { margin-bottom: 5px; }
         .score-container { text-align: center; margin-top: 15px; font-weight: bold; }
         
-        /* Boutons d'action larges */
+        /* Boutons d'action */
         .action-btn {
             width: 100%;
             padding: 12px;
@@ -262,7 +262,7 @@
 
     <script>
         const allLessonData = [
-            // --- LEÇON 1 ---
+            // LEÇON 1
             { ar: "أنا", tr: "ana", fr: "Je", tts: "أَنَا", type: "mot", lesson: 1 },
             { ar: "أنتَ", tr: "enta", fr: "Tu (homme)", tts: "أَنْتَ", type: "mot", lesson: 1 },
             { ar: "أنتِ", tr: "enti", fr: "Tu (femme)", tts: "أَنْتِي", type: "mot", lesson: 1 },
@@ -281,7 +281,7 @@
             { ar: "أنا نهدر دارجة دزايرية", tr: "ana nahder darja dzyrya", fr: "Je parle darja", tts: "أَنَا نَهْدَرْ دَارْجَة دْزَايْرِيَّة", type: "phrase", lesson: 1 },
             { ar: "صباح الخير أنا نهدر فرنسي", tr: "sabah el hair, ana nahder fransè", fr: "Bonjour, je parle français", tts: "صَبَاحْ الْخِيرْ أَنَا نَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
 
-            // --- LEÇON 2 ---
+            // LEÇON 2
             { ar: "إنتم", tr: "entoum", fr: "Vous (pluriel)", tts: "إِنْتُمْ", type: "mot", lesson: 2 },
             { ar: "لونگلي", tr: "langlè", fr: "L'anglais", tts: "لُونْغْلِي", type: "mot", lesson: 2 },
             { ar: "أونگلي", tr: "anglè", fr: "Anglais", tts: "أُونْغْلِي", type: "mot", lesson: 2 },
@@ -303,7 +303,7 @@
             { ar: "أنا مانهضرش أونگلي", tr: "ana ma nahdarsh anglè", fr: "Je ne parle pas anglais", tts: "أَنَا مَانَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 },
             { ar: "إنتا ماتهضرش أونگلي", tr: "enta ma tahdarsh anglè", fr: "Tu ne parles pas anglais (homme)", tts: "إِنْتَا مَاتَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 },
 
-            // --- LEÇON 3 ---
+            // LEÇON 3
             { ar: "مليح", tr: "mlyeh", fr: "Bien / Bon", tts: "مْلِيحْ", type: "mot", lesson: 3 },
             { ar: "أنا نحب", tr: "ana nhab", fr: "J'aime", tts: "أَنَا نْحَبْ", type: "mot", lesson: 3 },
             { ar: "إنتا تحب", tr: "enta thab", fr: "Tu aimes (homme)", tts: "إِنْتَا تْحَبْ", type: "mot", lesson: 3 },
@@ -335,6 +335,11 @@
             audioPlayer.play().catch(e => console.log("Init audio player silent error"));
             audioPlayer.pause();
             
+            if ('speechSynthesis' in window) {
+                let msg = new SpeechSynthesisUtterance('');
+                window.speechSynthesis.speak(msg);
+            }
+
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             
@@ -342,20 +347,26 @@
         }
 
         function playAudio(ttsText) {
-            stopPlayAll(); // Arrête la lecture automatique si on clique manuellement
-            
-            audioPlayer.onended = null; // Nettoie les événements de boucle
+            stopPlayAll(); 
+            audioPlayer.onended = null;
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(ttsText)}`;
             
             audioPlayer.src = url;
-            audioPlayer.play().catch(error => console.log("Erreur de lecture audio"));
+            audioPlayer.play().catch(error => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(ttsText);
+                    utterance.lang = 'ar-SA';
+                    window.speechSynthesis.speak(utterance);
+                }
+            });
         }
 
         function playCurrentAudio() {
             if (currentQuestion) playAudio(currentQuestion.tts);
         }
 
-        // --- NOUVELLE FONCTIONNALITÉ : ÉCOUTER ET RÉPÉTER ---
+        // --- MOTEUR DE LECTURE AUTOMATIQUE RÉÉCRIT POUR IOS ---
         
         function startPlayAll() {
             if(activeData.length === 0) return;
@@ -365,29 +376,65 @@
             document.getElementById('play-all-btn').style.display = 'none';
             document.getElementById('stop-all-btn').style.display = 'block';
             
-            playSequenceFr();
+            playSequence();
         }
 
         function stopPlayAll() {
             isPlayingAll = false;
             audioPlayer.onended = null;
             audioPlayer.pause();
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             clearTimeout(sequenceTimeout);
             
             document.getElementById('play-all-btn').style.display = 'block';
             document.getElementById('stop-all-btn').style.display = 'none';
             
-            // Enlève le surlignage de tous les mots
             document.querySelectorAll('.vocab-item').forEach(el => el.classList.remove('highlight'));
         }
 
-        function playSequenceFr() {
+        // Fonction universelle pour dire un mot (gère les blocages Safari)
+        function speakWord(text, lang, callback) {
+            if (!isPlayingAll) return;
+
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodeURIComponent(text)}`;
+            audioPlayer.src = url;
+            
+            // Si le lecteur web fonctionne
+            audioPlayer.onended = function() {
+                audioPlayer.onended = null;
+                if (callback) callback();
+            };
+
+            audioPlayer.play().catch(error => {
+                // Si Safari bloque l'audio web, on bascule sur la voix native et on relie l'évènement de fin !
+                audioPlayer.onended = null;
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    let utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = lang === 'fr' ? 'fr-FR' : 'ar-SA';
+                    
+                    utterance.onend = function() {
+                        if (callback) callback();
+                    };
+                    utterance.onerror = function() {
+                        if (callback) callback(); // Continue même en cas d'erreur locale
+                    };
+                    
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    stopPlayAll();
+                }
+            });
+        }
+
+        // La boucle de lecture
+        function playSequence() {
             if (!isPlayingAll || playIndex >= activeData.length) {
                 stopPlayAll();
                 return;
             }
 
-            // Surligne le mot en cours
+            // Surlignage et défilement
             document.querySelectorAll('.vocab-item').forEach(el => el.classList.remove('highlight'));
             let currentElement = document.getElementById('vocab-item-' + playIndex);
             if(currentElement) {
@@ -397,43 +444,28 @@
 
             let currentItem = activeData[playIndex];
             
-            // 1. Joue le mot en Français (tl=fr)
-            const frUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=fr&client=tw-ob&q=${encodeURIComponent(currentItem.fr)}`;
-            audioPlayer.src = frUrl;
-            
-            audioPlayer.onended = function() {
-                if (!isPlayingAll) return;
-                playSequenceAr(currentItem);
-            };
-            audioPlayer.play().catch(e => stopPlayAll());
-        }
-
-        function playSequenceAr(currentItem) {
-            if (!isPlayingAll) return;
-            
-            // 2. Joue le mot en Darja (tl=ar avec Soukoun)
-            const arUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(currentItem.tts)}`;
-            audioPlayer.src = arUrl;
-            
-            audioPlayer.onended = function() {
+            // 1. Lire le français
+            speakWord(currentItem.fr, 'fr', function() {
                 if (!isPlayingAll) return;
                 
-                // 3. Pause (2 secondes ou plus si la phrase est longue)
-                let pauseTime = Math.max(2000, currentItem.tts.length * 120); 
-                
-                sequenceTimeout = setTimeout(() => {
+                // 2. Lire l'arabe
+                speakWord(currentItem.tts, 'ar', function() {
                     if (!isPlayingAll) return;
-                    playIndex++;
-                    playSequenceFr();
-                }, pauseTime);
-            };
-            audioPlayer.play().catch(e => stopPlayAll());
+                    
+                    // 3. Pause
+                    let pauseTime = Math.max(2000, currentItem.tts.length * 120); 
+                    sequenceTimeout = setTimeout(() => {
+                        playIndex++;
+                        playSequence();
+                    }, pauseTime);
+                });
+            });
         }
 
-        // --- FIN NOUVELLE FONCTIONNALITÉ ---
+        // --- FIN DU MOTEUR IOS ---
 
         function changeLesson() {
-            stopPlayAll(); // Arrête l'audio si on change de leçon
+            stopPlayAll();
             const selector = document.getElementById('lesson-selector');
             const choice = selector.value;
             if (choice === "all") {
@@ -464,7 +496,7 @@
             activeData.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'vocab-item';
-                div.id = 'vocab-item-' + index; // Identifiant unique pour le surlignage
+                div.id = 'vocab-item-' + index;
                 
                 div.innerHTML = `
                     <div class="vocab-text">
