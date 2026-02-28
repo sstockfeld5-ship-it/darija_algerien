@@ -12,7 +12,7 @@
             --dark: #333;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--light);
             color: var(--dark);
             margin: 0;
@@ -30,8 +30,32 @@
             max-width: 600px;
             width: 100%;
             margin-bottom: 20px;
+            display: none; /* Caché jusqu'à l'activation */
         }
         
+        /* Bouton d'activation iOS */
+        #start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+            text-align: center;
+        }
+        #start-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5em;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(210, 16, 52, 0.4);
+            margin-bottom: 20px;
+        }
+        #start-btn:active { transform: scale(0.95); }
+        .warning { color: #555; font-size: 0.9em; max-width: 300px; }
+
         #lesson-selector {
             width: 100%;
             padding: 12px;
@@ -44,8 +68,8 @@
             background-color: white;
             cursor: pointer;
             outline: none;
+            -webkit-appearance: none;
         }
-        #lesson-selector:focus { box-shadow: 0 0 5px rgba(0, 102, 51, 0.5); }
 
         .tabs {
             display: flex;
@@ -60,6 +84,7 @@
             color: gray;
             flex-grow: 1;
             text-align: center;
+            -webkit-tap-highlight-color: transparent;
         }
         .tab.active {
             color: var(--primary);
@@ -103,8 +128,9 @@
             align-items: center;
             justify-content: center;
             margin-left: 15px;
+            -webkit-tap-highlight-color: transparent;
         }
-        button.audio-btn:hover { background-color: #004d26; }
+        button.audio-btn:active { background-color: #004d26; }
         .question-text {
             font-size: 1.2em;
             margin-bottom: 20px;
@@ -128,7 +154,9 @@
             margin: 0 auto 15px auto;
             cursor: pointer;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            -webkit-tap-highlight-color: transparent;
         }
+        .big-audio-btn:active { transform: scale(0.95); }
         .options { display: flex; flex-direction: column; gap: 10px; }
         button.option-btn {
             padding: 15px;
@@ -142,7 +170,7 @@
             flex-direction: column;
             align-items: center;
         }
-        button.option-btn:hover:not(:disabled) { background: #e9e9e9; }
+        button.option-btn:active { background: #e9e9e9; }
         button.option-btn.correct { background: var(--primary); color: white; border-color: var(--primary); }
         button.option-btn.wrong { background: var(--secondary); color: white; border-color: var(--secondary); }
         button.option-btn .arabe { margin-bottom: 5px; }
@@ -160,14 +188,18 @@
             font-size: 1.1em;
             font-weight: bold;
         }
-        .empty-state { text-align: center; color: gray; font-style: italic; padding: 20px; }
     </style>
 </head>
 <body>
 
     <h1>🇩🇿 Apprendre le Darja</h1>
 
-    <div class="container">
+    <div id="start-screen">
+        <button id="start-btn" onclick="initApp()">Démarrer l'application 🔊</button>
+        <p class="warning">⚠️ Vérifiez que votre iPhone <b>n'est pas en mode silencieux</b> (bouton sur le côté) et montez le volume.</p>
+    </div>
+
+    <div class="container" id="main-app">
         
         <select id="lesson-selector" onchange="changeLesson()">
             <option value="2">📖 Leçon 2</option>
@@ -207,60 +239,87 @@
         </div>
     </div>
 
-    <audio id="audio-player" style="display:none;"></audio>
-
     <script>
         const allLessonData = [
-            // --- LEÇON 1 ---
-            { ar: "أنا", tr: "ana", fr: "Je", tts: "أَنَا", type: "mot", lesson: 1 },
-            { ar: "أنتَ", tr: "enta", fr: "Tu (homme)", tts: "أَنْتَ", type: "mot", lesson: 1 },
-            { ar: "أنتِ", tr: "enti", fr: "Tu (femme)", tts: "أَنْتِي", type: "mot", lesson: 1 },
-            { ar: "نهدر", tr: "nahder", fr: "(Je) parle", tts: "نَهْدَرْ", type: "mot", lesson: 1 },
-            { ar: "تهدر", tr: "tahder", fr: "(Tu) parles (homme)", tts: "تَهْدَرْ", type: "mot", lesson: 1 },
-            { ar: "تهدري", tr: "tahdri", fr: "(Tu) parles (femme)", tts: "تَهْدْرِي", type: "mot", lesson: 1 },
-            { ar: "نتعلم", tr: "nata'alam", fr: "(J') apprends", tts: "نْتْعَلَّمْ", type: "mot", lesson: 1 },
-            { ar: "صباح الخير", tr: "sabah el hair", fr: "Bonjour", tts: "صَبَاحْ الْخِيرْ", type: "mot", lesson: 1 },
-            { ar: "فرنسي", tr: "fransè", fr: "Français", tts: "فْرَانْسِي", type: "mot", lesson: 1 },
-            { ar: "عربية", tr: "'arbiya", fr: "Arabe", tts: "عَرْبِيَّة", type: "mot", lesson: 1 },
-            { ar: "دارجة دزايرية", tr: "darja dzyrya", fr: "Darja algérien", tts: "دَارْجَة دْزَايْرِيَّة", type: "mot", lesson: 1 },
-            { ar: "أنا نهدر فرنسي", tr: "ana nahder fransè", fr: "Je parle français", tts: "أَنَا نَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
-            { ar: "أنتَ تهدر فرنسي", tr: "enta tahder fransè", fr: "Tu parles français (homme)", tts: "أَنْتَ تَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
-            { ar: "أنتِ تهدري فرنسي؟", tr: "enti tahdri fransè?", fr: "Tu parles français ? (femme)", tts: "أَنْتِي تَهْدْرِي فْرَانْسِي", type: "phrase", lesson: 1 },
-            { ar: "أنا نتعلم دارجة دزايرية", tr: "ana nata'alam darja dzyrya", fr: "J'apprends le darja", tts: "أَنَا نْتْعَلَّمْ دَارْجَة دْزَايْرِيَّة", type: "phrase", lesson: 1 },
-            { ar: "أنا نهدر دارجة دزايرية", tr: "ana nahder darja dzyrya", fr: "Je parle darja", tts: "أَنَا نَهْدَرْ دَارْجَة دْزَايْرِيَّة", type: "phrase", lesson: 1 },
-            { ar: "صباح الخير أنا نهدر فرنسي", tr: "sabah el hair, ana nahder fransè", fr: "Bonjour, je parle français", tts: "صَبَاحْ الْخِيرْ أَنَا نَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
+            // LEÇON 1
+            { ar: "أنا", tr: "ana", fr: "Je", type: "mot", lesson: 1 },
+            { ar: "أنتَ", tr: "enta", fr: "Tu (homme)", type: "mot", lesson: 1 },
+            { ar: "أنتِ", tr: "enti", fr: "Tu (femme)", type: "mot", lesson: 1 },
+            { ar: "نهدر", tr: "nahder", fr: "(Je) parle", type: "mot", lesson: 1 },
+            { ar: "تهدر", tr: "tahder", fr: "(Tu) parles (homme)", type: "mot", lesson: 1 },
+            { ar: "تهدري", tr: "tahdri", fr: "(Tu) parles (femme)", type: "mot", lesson: 1 },
+            { ar: "نتعلم", tr: "nata'alam", fr: "(J') apprends", type: "mot", lesson: 1 },
+            { ar: "صباح الخير", tr: "sabah el hair", fr: "Bonjour", type: "mot", lesson: 1 },
+            { ar: "فرنسي", tr: "fransè", fr: "Français", type: "mot", lesson: 1 },
+            { ar: "عربية", tr: "'arbiya", fr: "Arabe", type: "mot", lesson: 1 },
+            { ar: "دارجة دزايرية", tr: "darja dzyrya", fr: "Darja algérien", type: "mot", lesson: 1 },
+            { ar: "أنا نهدر فرنسي", tr: "ana nahder fransè", fr: "Je parle français", type: "phrase", lesson: 1 },
+            { ar: "أنتَ تهدر فرنسي", tr: "enta tahder fransè", fr: "Tu parles français (homme)", type: "phrase", lesson: 1 },
+            { ar: "أنتِ تهدري فرنسي؟", tr: "enti tahdri fransè?", fr: "Tu parles français ? (femme)", type: "phrase", lesson: 1 },
+            { ar: "أنا نتعلم دارجة دزايرية", tr: "ana nata'alam darja dzyrya", fr: "J'apprends le darja", type: "phrase", lesson: 1 },
+            { ar: "أنا نهدر دارجة دزايرية", tr: "ana nahder darja dzyrya", fr: "Je parle darja", type: "phrase", lesson: 1 },
+            { ar: "صباح الخير أنا نهدر فرنسي", tr: "sabah el hair, ana nahder fransè", fr: "Bonjour, je parle français", type: "phrase", lesson: 1 },
 
-            // --- LEÇON 2 ---
-            { ar: "إنتم", tr: "entoum", fr: "Vous (pluriel)", tts: "إِنْتُمْ", type: "mot", lesson: 2 },
-            { ar: "لونگلي", tr: "langlè", fr: "L'anglais", tts: "لُونْغْلِي", type: "mot", lesson: 2 },
-            { ar: "أونگلي", tr: "anglè", fr: "Anglais", tts: "أُونْغْلِي", type: "mot", lesson: 2 },
-            
-            { ar: "أنا نتعلم دارجة دزايرية", tr: "ana nata’alam darja dziri’ya", fr: "J'apprends le darja algérien", tts: "أَنَا نْتْعَلَّمْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "إنتا تتعلم", tr: "enta tata’alam", fr: "Tu apprends (homme)", tts: "إِنْتَا تْتْعَلَّمْ", type: "phrase", lesson: 2 },
-            { ar: "إنتي تتعلمي", tr: "enti tata’alami", fr: "Tu apprends (femme)", tts: "إِنْتِي تْتْعَلَّمِي", type: "phrase", lesson: 2 },
-            { ar: "إنتا تهضر فرونصي", tr: "enta tahdar fransè", fr: "Tu parles français (homme)", tts: "إِنْتَا تَهْدَرْ فْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "إنتا تتعلم فرونصي", tr: "enta tata’alam fransè", fr: "Tu apprends le français (homme)", tts: "إِنْتَا تْتْعَلَّمْ فْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "إنتم تهضرو", tr: "entoum tahdro", fr: "Vous parlez", tts: "إِنْتُمْ تَهْدْرُوا", type: "phrase", lesson: 2 },
-            { ar: "إنتم تهضرو دارجة دزايرية", tr: "entoum tahdro darja dziri’ya", fr: "Vous parlez darja algérien", tts: "إِنْتُمْ تَهْدْرُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "إنتم تتعلمو دارجة دزايرية", tr: "entoum tata’alamou darja dziri’ya", fr: "Vous apprenez le darja", tts: "إِنْتُمْ تْتْعَلْمُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "إنتما تتعلمو دارجة دزايرية؟", tr: "entouma tata’alamou darja dziri’ya?", fr: "Vous apprenez le darja ? (Question)", tts: "إِنْتُمَا تْتْعَلْمُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "إنتيا تتعلمي لفرونصي؟", tr: "entia tata’alami el fransè?", fr: "Tu apprends le français ? (Question femme)", tts: "إِنْتِيَا تْتْعَلْمِي لْفْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "صباح الخير، إنتا تهضر أونگلي؟", tr: "sabah el kheyr, enta tahdar anglè?", fr: "Bonjour, tu parles anglais ?", tts: "صَبَاحْ الْخِيرْ، إِنْتَا تَهْدَرْ أُونْغْلِي", type: "phrase", lesson: 2 },
-            { ar: "إنتما تهضرو فرونصي؟", tr: "entouma tahdro fransè?", fr: "Vous parlez français ?", tts: "إِنْتُمَا تَهْدْرُوا فْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "أنا مانهضرش", tr: "ana ma nahdarsh", fr: "Je ne parle pas", tts: "أَنَا مَانَهْدَرْشْ", type: "phrase", lesson: 2 },
-            { ar: "أنا مانهضرش دارجة دزايرية", tr: "ana ma nahdarsh darja dziri’ya", fr: "Je ne parle pas darja algérien", tts: "أَنَا مَانَهْدَرْشْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "أنا مانهضرش فرونصي", tr: "ana ma nahdarsh fransè", fr: "Je ne parle pas français", tts: "أَنَا مَانَهْدَرْشْ فْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "أنا مانهضرش أونگلي", tr: "ana ma nahdarsh anglè", fr: "Je ne parle pas anglais", tts: "أَنَا مَانَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 },
-            { ar: "إنتا ماتهضرش أونگلي", tr: "enta ma tahdarsh anglè", fr: "Tu ne parles pas anglais (homme)", tts: "إِنْتَا مَاتَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 }
+            // LEÇON 2
+            { ar: "إنتم", tr: "entoum", fr: "Vous (pluriel)", type: "mot", lesson: 2 },
+            { ar: "لونگلي", tr: "langlè", fr: "L'anglais", type: "mot", lesson: 2 },
+            { ar: "أونگلي", tr: "anglè", fr: "Anglais", type: "mot", lesson: 2 },
+            { ar: "أنا نتعلم دارجة دزايرية", tr: "ana nata’alam darja dziri’ya", fr: "J'apprends le darja algérien", type: "phrase", lesson: 2 },
+            { ar: "إنتا تتعلم", tr: "enta tata’alam", fr: "Tu apprends (homme)", type: "phrase", lesson: 2 },
+            { ar: "إنتي تتعلمي", tr: "enti tata’alami", fr: "Tu apprends (femme)", type: "phrase", lesson: 2 },
+            { ar: "إنتا تهضر فرونصي", tr: "enta tahdar fransè", fr: "Tu parles français (homme)", type: "phrase", lesson: 2 },
+            { ar: "إنتا تتعلم فرونصي", tr: "enta tata’alam fransè", fr: "Tu apprends le français (homme)", type: "phrase", lesson: 2 },
+            { ar: "إنتم تهضرو", tr: "entoum tahdro", fr: "Vous parlez", type: "phrase", lesson: 2 },
+            { ar: "إنتم تهضرو دارجة دزايرية", tr: "entoum tahdro darja dziri’ya", fr: "Vous parlez darja algérien", type: "phrase", lesson: 2 },
+            { ar: "إنتم تتعلمو دارجة دزايرية", tr: "entoum tata’alamou darja dziri’ya", fr: "Vous apprenez le darja", type: "phrase", lesson: 2 },
+            { ar: "إنتما تتعلمو دارجة دزايرية؟", tr: "entouma tata’alamou darja dziri’ya?", fr: "Vous apprenez le darja ? (Question)", type: "phrase", lesson: 2 },
+            { ar: "إنتيا تتعلمي لفرونصي؟", tr: "entia tata’alami el fransè?", fr: "Tu apprends le français ? (Question femme)", type: "phrase", lesson: 2 },
+            { ar: "صباح الخير، إنتا تهضر أونگلي؟", tr: "sabah el kheyr, enta tahdar anglè?", fr: "Bonjour, tu parles anglais ?", type: "phrase", lesson: 2 },
+            { ar: "إنتما تهضرو فرونصي؟", tr: "entouma tahdro fransè?", fr: "Vous parlez français ?", type: "phrase", lesson: 2 },
+            { ar: "أنا مانهضرش", tr: "ana ma nahdarsh", fr: "Je ne parle pas", type: "phrase", lesson: 2 },
+            { ar: "أنا مانهضرش دارجة دزايرية", tr: "ana ma nahdarsh darja dziri’ya", fr: "Je ne parle pas darja algérien", type: "phrase", lesson: 2 },
+            { ar: "أنا مانهضرش فرونصي", tr: "ana ma nahdarsh fransè", fr: "Je ne parle pas français", type: "phrase", lesson: 2 },
+            { ar: "أنا مانهضرش أونگلي", tr: "ana ma nahdarsh anglè", fr: "Je ne parle pas anglais", type: "phrase", lesson: 2 },
+            { ar: "إنتا ماتهضرش أونگلي", tr: "enta ma tahdarsh anglè", fr: "Tu ne parles pas anglais (homme)", type: "phrase", lesson: 2 }
         ];
 
         let activeData = [];
         let currentQuestion = null;
         let scoreTrad = 0, totalTrad = 0;
         let scoreAudio = 0, totalAudio = 0;
-        
-        // On récupère le lecteur audio pré-créé dans le HTML
-        const audioPlayer = document.getElementById('audio-player');
+
+        // Fonction obligatoire pour débloquer l'audio sur iOS
+        function initApp() {
+            // Joue un son vide pour forcer iOS à autoriser l'API SpeechSynthesis
+            let msg = new SpeechSynthesisUtterance('');
+            window.speechSynthesis.speak(msg);
+            
+            // Cache l'écran de démarrage et montre l'app
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            
+            changeLesson();
+        }
+
+        // Fonction de lecture native (Utilise la voix française pour lire la phonétique)
+        function playAudio(phoneticText) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Coupe l'audio précédent
+                
+                // On nettoie un peu le texte pour que la voix française le lise mieux
+                let cleanText = phoneticText.replace(/'/g, " "); 
+                
+                let utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'fr-FR'; // Voix française
+                utterance.rate = 0.85; // Un peu ralenti pour bien entendre
+                
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playCurrentAudio() {
+            if (currentQuestion) playAudio(currentQuestion.tr);
+        }
 
         function changeLesson() {
             const selector = document.getElementById('lesson-selector');
@@ -286,54 +345,24 @@
             const listMots = document.getElementById('vocab-mots');
             const listPhrases = document.getElementById('vocab-phrases');
             listMots.innerHTML = ''; listPhrases.innerHTML = '';
-            
-            let hasMots = false;
-            let hasPhrases = false;
 
             activeData.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'vocab-item';
+                
+                // Échapper les apostrophes pour le javascript
+                const safePhonetic = item.tr.replace(/'/g, "\\'");
+
                 div.innerHTML = `
                     <div class="vocab-text">
                         <span class="arabe">${item.ar}</span>
                         <span class="traductions"><b>${item.tr}</b><br>${item.fr}</span>
                     </div>
-                    <button class="audio-btn" onclick="playAudio('${item.tts}')" title="Écouter">🔊</button>
+                    <button class="audio-btn" onclick="playAudio('${safePhonetic}')" title="Écouter">🔊</button>
                 `;
-                if (item.type === 'mot') {
-                    listMots.appendChild(div);
-                    hasMots = true;
-                } else {
-                    listPhrases.appendChild(div);
-                    hasPhrases = true;
-                }
+                if (item.type === 'mot') listMots.appendChild(div);
+                else listPhrases.appendChild(div);
             });
-
-            if(!hasMots) listMots.innerHTML = "<div class='empty-state'>Aucun mot simple dans cette sélection.</div>";
-            if(!hasPhrases) listPhrases.innerHTML = "<div class='empty-state'>Aucune phrase dans cette sélection.</div>";
-        }
-
-        function playAudio(text) {
-            // 1ère étape : On essaie avec l'audio de Google via notre balise <audio> (Meilleure qualité)
-            const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(text)}`;
-            audioPlayer.src = url;
-            
-            audioPlayer.play().catch(error => {
-                // 2ème étape : Si l'iPhone bloque le son web, on bascule direct sur la voix interne du téléphone
-                console.log("Audio web bloqué, passage à la voix native d'iOS.");
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel(); // Coupe tout son précédent
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'ar-SA';
-                    window.speechSynthesis.speak(utterance);
-                } else {
-                    alert("Le son est bloqué. Vérifie que ton iPhone n'est pas en mode silencieux !");
-                }
-            });
-        }
-
-        function playCurrentAudio() {
-            if (currentQuestion) playAudio(currentQuestion.tts);
         }
 
         function getOptions(correctItem) {
@@ -409,7 +438,7 @@
 
             if (selectedOption === currentQuestion) {
                 button.classList.add('correct');
-                if (type === 'trad') playAudio(currentQuestion.tts);
+                if (type === 'trad') playAudio(currentQuestion.tr);
             } else {
                 button.classList.add('wrong');
                 buttons.forEach(btn => {
@@ -426,8 +455,6 @@
             document.getElementById(`score-${type}`).innerText = score;
             document.getElementById(`total-${type}`).innerText = total;
         }
-
-        changeLesson();
     </script>
 </body>
 </html>
