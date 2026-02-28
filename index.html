@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Révision Darja Algérien - Cours Complet</title>
+    <style>
+        :root {
+            --primary: #006633;
+            --secondary: #D21034;
+            --light: #f4f4f4;
+            --dark: #333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: var(--primary); text-align: center; }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        /* Sélecteur de leçon */
+        #lesson-selector {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--dark);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            outline: none;
+        }
+        #lesson-selector:focus {
+            box-shadow: 0 0 5px rgba(0, 102, 51, 0.5);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary);
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: gray;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 4px solid var(--primary);
+            margin-bottom: -2px;
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        h2 {
+            color: var(--secondary);
+            font-size: 1.2em;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+        .vocab-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .vocab-text { display: flex; flex-direction: column; }
+        .arabe {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: right;
+            direction: rtl;
+        }
+        .traductions { font-size: 0.9em; color: #555; margin-top: 3px; }
+        button.audio-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            min-width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+        }
+        button.audio-btn:hover { background-color: #004d26; }
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .big-audio-btn {
+            font-size: 3em;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        button.option-btn {
+            padding: 15px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        button.option-btn:hover:not(:disabled) { background: #e9e9e9; }
+        button.option-btn.correct { background: var(--primary); color: white; border-color: var(--primary); }
+        button.option-btn.wrong { background: var(--secondary); color: white; border-color: var(--secondary); }
+        button.option-btn .arabe { margin-bottom: 5px; }
+        .score-container { text-align: center; margin-top: 15px; font-weight: bold; }
+        .next-btn {
+            display: none;
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .empty-state { text-align: center; color: gray; font-style: italic; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>🇩🇿 Apprendre le Darja</h1>
+
+    <div class="container">
+        
+        <select id="lesson-selector" onchange="changeLesson()">
+            <option value="2">📖 Leçon 2 (Nouveau !)</option>
+            <option value="1">📖 Leçon 1</option>
+            <option value="all">📚 Toutes les leçons mélangées</option>
+        </select>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showSection('vocab')">Vocabulaire</div>
+            <div class="tab" onclick="showSection('quiz-trad')">Quiz Texte</div>
+            <div class="tab" onclick="showSection('quiz-audio')">Quiz Audio</div>
+        </div>
+
+        <div id="vocab" class="section active">
+            <p style="text-align: center; font-size: 0.9em; color: gray;"><i>Clique sur l'icône 🔊 pour écouter.</i></p>
+            <h2>Mots de base</h2>
+            <div id="vocab-mots"></div>
+            <h2>Phrases complètes</h2>
+            <div id="vocab-phrases"></div>
+        </div>
+
+        <div id="quiz-trad" class="section">
+            <div class="question-text" id="question-trad"></div>
+            <div class="options" id="options-trad"></div>
+            <button class="next-btn" id="next-btn-trad" onclick="nextTradQuestion()">Question suivante ➡️</button>
+            <div class="score-container">Score : <span id="score-trad">0</span> / <span id="total-trad">0</span></div>
+        </div>
+
+        <div id="quiz-audio" class="section">
+            <div class="question-text">
+                <button class="big-audio-btn" onclick="playCurrentAudio()" title="Écouter">🔊</button>
+                Écoute et choisis la bonne traduction :
+            </div>
+            <div class="options" id="options-audio"></div>
+            <button class="next-btn" id="next-btn-audio" onclick="nextAudioQuestion()">Question suivante ➡️</button>
+            <div class="score-container">Score : <span id="score-audio">0</span> / <span id="total-audio">0</span></div>
+        </div>
+    </div>
+
+    <script>
+        // Base de données unifiée avec les leçons 1 et 2
+        const allLessonData = [
+            // --- LEÇON 1 ---
+            { ar: "أنا", tr: "ana", fr: "Je", tts: "أَنَا", type: "mot", lesson: 1 },
+            { ar: "أنتَ", tr: "enta", fr: "Tu (homme)", tts: "أَنْتَ", type: "mot", lesson: 1 },
+            { ar: "أنتِ", tr: "enti", fr: "Tu (femme)", tts: "أَنْتِي", type: "mot", lesson: 1 },
+            { ar: "نهدر", tr: "nahder", fr: "(Je) parle", tts: "نَهْدَرْ", type: "mot", lesson: 1 },
+            { ar: "تهدر", tr: "tahder", fr: "(Tu) parles (homme)", tts: "تَهْدَرْ", type: "mot", lesson: 1 },
+            { ar: "تهدري", tr: "tahdri", fr: "(Tu) parles (femme)", tts: "تَهْدْرِي", type: "mot", lesson: 1 },
+            { ar: "نتعلم", tr: "nata'alam", fr: "(J') apprends", tts: "نْتْعَلَّمْ", type: "mot", lesson: 1 },
+            { ar: "صباح الخير", tr: "sabah el hair", fr: "Bonjour", tts: "صَبَاحْ الْخِيرْ", type: "mot", lesson: 1 },
+            { ar: "فرنسي", tr: "fransè", fr: "Français", tts: "فْرَانْسِي", type: "mot", lesson: 1 },
+            { ar: "عربية", tr: "'arbiya", fr: "Arabe", tts: "عَرْبِيَّة", type: "mot", lesson: 1 },
+            { ar: "دارجة دزايرية", tr: "darja dzyrya", fr: "Darja algérien", tts: "دَارْجَة دْزَايْرِيَّة", type: "mot", lesson: 1 },
+            { ar: "أنا نهدر فرنسي", tr: "ana nahder fransè", fr: "Je parle français", tts: "أَنَا نَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
+            { ar: "أنتَ تهدر فرنسي", tr: "enta tahder fransè", fr: "Tu parles français (homme)", tts: "أَنْتَ تَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
+            { ar: "أنتِ تهدري فرنسي؟", tr: "enti tahdri fransè?", fr: "Tu parles français ? (femme)", tts: "أَنْتِي تَهْدْرِي فْرَانْسِي", type: "phrase", lesson: 1 },
+            { ar: "أنا نتعلم دارجة دزايرية", tr: "ana nata'alam darja dzyrya", fr: "J'apprends le darja", tts: "أَنَا نْتْعَلَّمْ دَارْجَة دْزَايْرِيَّة", type: "phrase", lesson: 1 },
+            { ar: "أنا نهدر دارجة دزايرية", tr: "ana nahder darja dzyrya", fr: "Je parle darja", tts: "أَنَا نَهْدَرْ دَارْجَة دْزَايْرِيَّة", type: "phrase", lesson: 1 },
+            { ar: "صباح الخير أنا نهدر فرنسي", tr: "sabah el hair, ana nahder fransè", fr: "Bonjour, je parle français", tts: "صَبَاحْ الْخِيرْ أَنَا نَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
+
+            // --- LEÇON 2 ---
+            { ar: "إنتم", tr: "entoum", fr: "Vous (pluriel)", tts: "إِنْتُمْ", type: "mot", lesson: 2 },
+            { ar: "لونگلي", tr: "langlè", fr: "L'anglais", tts: "لُونْغْلِي", type: "mot", lesson: 2 },
+            { ar: "أونگلي", tr: "anglè", fr: "Anglais", tts: "أُونْغْلِي", type: "mot", lesson: 2 },
+            
+            { ar: "أنا نتعلم دارجة دزايرية", tr: "ana nata’alam darja dziri’ya", fr: "J'apprends le darja algérien", tts: "أَنَا نْتْعَلَّمْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
+            { ar: "إنتا تتعلم", tr: "enta tata’alam", fr: "Tu apprends (homme)", tts: "إِنْتَا تْتْعَلَّمْ", type: "phrase", lesson: 2 },
+            { ar: "إنتي تتعلمي", tr: "enti tata’alami", fr: "Tu apprends (femme)", tts: "إِنْتِي تْتْعَلَّمِي", type: "phrase", lesson: 2 },
+            { ar: "إنتا تهضر فرونصي", tr: "enta tahdar fransè", fr: "Tu parles français (homme)", tts: "إِنْتَا تَهْدَرْ فْرُونْصِي", type: "phrase", lesson: 2 },
+            { ar: "إنتا تتعلم فرونصي", tr: "enta tata’alam fransè", fr: "Tu apprends le français (homme)", tts: "إِنْتَا تْتْعَلَّمْ فْرُونْصِي", type: "phrase", lesson: 2 },
+            { ar: "إنتم تهضرو", tr: "entoum tahdro", fr: "Vous parlez", tts: "إِنْتُمْ تَهْدْرُوا", type: "phrase", lesson: 2 },
+            { ar: "إنتم تهضرو دارجة دزايرية", tr: "entoum tahdro darja dziri’ya", fr: "Vous parlez darja algérien", tts: "إِنْتُمْ تَهْدْرُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
+            { ar: "إنتم تتعلمو دارجة دزايرية", tr: "entoum tata’alamou darja dziri’ya", fr: "Vous apprenez le darja", tts: "إِنْتُمْ تْتْعَلْمُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
+            { ar: "إنتما تتعلمو دارجة دزايرية؟", tr: "entouma tata’alamou darja dziri’ya?", fr: "Vous apprenez le darja ? (Question)", tts: "إِنْتُمَا تْتْعَلْمُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
+            { ar: "إنتيا تتعلمي لفرونصي؟", tr: "entia tata’alami el fransè?", fr: "Tu apprends le français ? (Question femme)", tts: "إِنْتِيَا تْتْعَلْمِي لْفْرُونْصِي", type: "phrase", lesson: 2 },
+            { ar: "صباح الخير، إنتا تهضر أونگلي؟", tr: "sabah el kheyr, enta tahdar anglè?", fr: "Bonjour, tu parles anglais ?", tts: "صَبَاحْ الْخِيرْ، إِنْتَا تَهْدَرْ أُونْغْلِي", type: "phrase", lesson: 2 },
+            { ar: "إنتما تهضرو فرونصي؟", tr: "entouma tahdro fransè?", fr: "Vous parlez français ?", tts: "إِنْتُمَا تَهْدْرُوا فْرُونْصِي", type: "phrase", lesson: 2 },
+            { ar: "أنا مانهضرش", tr: "ana ma nahdarsh", fr: "Je ne parle pas", tts: "أَنَا مَانَهْدَرْشْ", type: "phrase", lesson: 2 },
+            { ar: "أنا مانهضرش دارجة دزايرية", tr: "ana ma nahdarsh darja dziri’ya", fr: "Je ne parle pas darja algérien", tts: "أَنَا مَانَهْدَرْشْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
+            { ar: "أنا مانهضرش فرونصي", tr: "ana ma nahdarsh fransè", fr: "Je ne parle pas français", tts: "أَنَا مَانَهْدَرْشْ فْرُونْصِي", type: "phrase", lesson: 2 },
+            { ar: "أنا مانهضرش أونگلي", tr: "ana ma nahdarsh anglè", fr: "Je ne parle pas anglais", tts: "أَنَا مَانَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 },
+            { ar: "إنتا ماتهضرش أونگلي", tr: "enta ma tahdarsh anglè", fr: "Tu ne parles pas anglais (homme)", tts: "إِنْتَا مَاتَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 }
+        ];
+
+        let activeData = [];
+        let currentQuestion = null;
+        let scoreTrad = 0, totalTrad = 0;
+        let scoreAudio = 0, totalAudio = 0;
+        let currentAudioObject = null; 
+
+        // Fonction pour mettre à jour les données selon la leçon choisie
+        function changeLesson() {
+            const selector = document.getElementById('lesson-selector');
+            const choice = selector.value;
+            
+            if (choice === "all") {
+                activeData = [...allLessonData];
+            } else {
+                activeData = allLessonData.filter(item => item.lesson == choice);
+            }
+            
+            // On recharge la vue actuelle
+            renderVocab();
+            
+            // On remet les scores à zéro et on relance les quiz si on change de leçon
+            startTradQuiz();
+            startAudioQuiz();
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function renderVocab() {
+            const listMots = document.getElementById('vocab-mots');
+            const listPhrases = document.getElementById('vocab-phrases');
+            listMots.innerHTML = ''; listPhrases.innerHTML = '';
+            
+            let hasMots = false;
+            let hasPhrases = false;
+
+            activeData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'vocab-item';
+                div.innerHTML = `
+                    <div class="vocab-text">
+                        <span class="arabe">${item.ar}</span>
+                        <span class="traductions"><b>${item.tr}</b><br>${item.fr}</span>
+                    </div>
+                    <button class="audio-btn" onclick="playAudio('${item.tts}')" title="Écouter">🔊</button>
+                `;
+                if (item.type === 'mot') {
+                    listMots.appendChild(div);
+                    hasMots = true;
+                } else {
+                    listPhrases.appendChild(div);
+                    hasPhrases = true;
+                }
+            });
+
+            if(!hasMots) listMots.innerHTML = "<div class='empty-state'>Aucun mot simple dans cette sélection.</div>";
+            if(!hasPhrases) listPhrases.innerHTML = "<div class='empty-state'>Aucune phrase dans cette sélection.</div>";
+        }
+
+        function playAudio(text) {
+            if (currentAudioObject) {
+                currentAudioObject.pause();
+                currentAudioObject.currentTime = 0;
+            }
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(text)}`;
+            currentAudioObject = new Audio(url);
+            currentAudioObject.play().catch(error => {
+                console.log("Lecture audio impossible", error);
+            });
+        }
+
+        function playCurrentAudio() {
+            if (currentQuestion) playAudio(currentQuestion.tts);
+        }
+
+        function getOptions(correctItem) {
+            let options = [correctItem];
+            // On pioche les mauvaises réponses dans TOUTE la base pour que ce soit plus dur,
+            // mais on garde le même type (mot vs phrase).
+            let distractors = allLessonData.filter(item => item.type === correctItem.type && item !== correctItem);
+            distractors.sort(() => Math.random() - 0.5);
+            if (distractors.length > 0) options.push(distractors[0]);
+            if (distractors.length > 1) options.push(distractors[1]);
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function startTradQuiz() {
+            scoreTrad = 0; totalTrad = 0;
+            updateScore('trad', scoreTrad, totalTrad);
+            nextTradQuestion();
+        }
+
+        function nextTradQuestion() {
+            document.getElementById('next-btn-trad').style.display = 'none';
+            if(activeData.length === 0) return;
+            
+            currentQuestion = activeData[Math.floor(Math.random() * activeData.length)];
+            document.getElementById('question-trad').innerHTML = `Traduisez :<br><span style="color:var(--primary); font-size:1.3em;">"${currentQuestion.fr}"</span>`;
+            
+            const container = document.getElementById('options-trad');
+            container.innerHTML = '';
+            getOptions(currentQuestion).forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="arabe">${opt.ar}</span><span>${opt.tr}</span>`;
+                btn.onclick = () => checkAnswer(btn, opt, 'trad');
+                container.appendChild(btn);
+            });
+        }
+
+        function startAudioQuiz() {
+            scoreAudio = 0; totalAudio = 0;
+            updateScore('audio', scoreAudio, totalAudio);
+            nextAudioQuestion();
+        }
+
+        function nextAudioQuestion() {
+            document.getElementById('next-btn-audio').style.display = 'none';
+            if(activeData.length === 0) return;
+
+            currentQuestion = activeData[Math.floor(Math.random() * activeData.length)];
+            const container = document.getElementById('options-audio');
+            container.innerHTML = '';
+            getOptions(currentQuestion).forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<b>${opt.fr}</b>`; 
+                btn.onclick = () => checkAnswer(btn, opt, 'audio');
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(button, selectedOption, type) {
+            const containerId = type === 'trad' ? 'options-trad' : 'options-audio';
+            const nextBtnId = type === 'trad' ? 'next-btn-trad' : 'next-btn-audio';
+            const buttons = document.getElementById(containerId).querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            if (type === 'trad') {
+                totalTrad++;
+                if (selectedOption === currentQuestion) scoreTrad++;
+                updateScore('trad', scoreTrad, totalTrad);
+            } else {
+                totalAudio++;
+                if (selectedOption === currentQuestion) scoreAudio++;
+                updateScore('audio', scoreAudio, totalAudio);
+            }
+
+            if (selectedOption === currentQuestion) {
+                button.classList.add('correct');
+                if (type === 'trad') playAudio(currentQuestion.tts);
+            } else {
+                button.classList.add('wrong');
+                buttons.forEach(btn => {
+                    const matchText = type === 'trad' ? currentQuestion.ar : currentQuestion.fr;
+                    if (btn.innerHTML.includes(matchText)) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            document.getElementById(nextBtnId).style.display = 'block';
+        }
+
+        function updateScore(type, score, total) {
+            document.getElementById(`score-${type}`).innerText = score;
+            document.getElementById(`total-${type}`).innerText = total;
+        }
+
+        // Initialisation au lancement de la page
+        changeLesson();
+    </script>
+</body>
+</html>
