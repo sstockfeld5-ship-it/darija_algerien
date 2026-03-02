@@ -33,7 +33,6 @@
             margin-bottom: 20px;
             display: none; 
         }
-        
         #start-screen {
             display: flex;
             flex-direction: column;
@@ -55,7 +54,6 @@
         }
         #start-btn:active { transform: scale(0.95); }
         .warning { color: #555; font-size: 0.9em; max-width: 300px; }
-
         #lesson-selector {
             width: 100%;
             padding: 12px;
@@ -70,7 +68,6 @@
             outline: none;
             -webkit-appearance: none;
         }
-
         .tabs {
             display: flex;
             margin-bottom: 20px;
@@ -100,7 +97,6 @@
             padding-bottom: 5px;
             margin-top: 25px;
         }
-        
         .vocab-item {
             display: flex;
             justify-content: space-between;
@@ -138,7 +134,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         button.audio-btn:active { opacity: 0.7; }
-        
         .question-text {
             font-size: 1.2em;
             margin-bottom: 20px;
@@ -183,7 +178,6 @@
         button.option-btn.wrong { background: var(--secondary); color: white; border-color: var(--secondary); }
         button.option-btn .arabe { margin-bottom: 5px; }
         .score-container { text-align: center; margin-top: 15px; font-weight: bold; }
-        
         .action-btn {
             width: 100%;
             padding: 12px;
@@ -211,15 +205,18 @@
     </div>
 
     <div class="container" id="main-app">
-        
         <select id="lesson-selector" onchange="changeLesson()">
-            <option value="6">📖 Leçon 6 (Nouveau !)</option>
+            <option value="10">📖 Leçon 10 (Nouveau !)</option>
+            <option value="9">📖 Leçon 9 (Nouveau !)</option>
+            <option value="8">📖 Leçon 8</option>
+            <option value="7">📖 Leçon 7</option>
+            <option value="6">📖 Leçon 6</option>
             <option value="5">📖 Leçon 5</option>
             <option value="4">📖 Leçon 4</option>
             <option value="3">📖 Leçon 3</option>
             <option value="2">📖 Leçon 2</option>
             <option value="1">📖 Leçon 1</option>
-            <option value="all">📚 Toutes les leçons mélangées</option>
+            <option value="all">📚 Toutes les leçons</option>
         </select>
 
         <div class="tabs">
@@ -229,11 +226,9 @@
         </div>
 
         <div id="vocab" class="section active">
-            <button id="play-all-btn" class="action-btn" onclick="startPlayAll()">🎧 Écouter & Répéter la leçon</button>
-            <button id="stop-all-btn" class="action-btn" style="display: none;" onclick="stopPlayAll()">⏹️ Arrêter la lecture</button>
-            
+            <button id="play-all-btn" class="action-btn" onclick="startPlayAll()">🎧 Écouter & Répéter</button>
+            <button id="stop-all-btn" class="action-btn" style="display: none;" onclick="stopPlayAll()">⏹️ Arrêter</button>
             <p style="text-align: center; font-size: 0.9em; color: gray; margin-top: 15px;"><i>Clique sur l'icône 🔊 pour écouter un mot précis.</i></p>
-            
             <h2>Mots de base</h2>
             <div id="vocab-mots"></div>
             <h2>Phrases complètes</h2>
@@ -262,127 +257,209 @@
 
     <script>
         const allLessonData = [
-            // LEÇON 1
-            { ar: "أنا", tr: "ana", fr: "Je", tts: "أَنَا", type: "mot", lesson: 1 },
-            { ar: "أنتَ", tr: "enta", fr: "Tu (homme)", tts: "أَنْتَ", type: "mot", lesson: 1 },
-            { ar: "أنتِ", tr: "enti", fr: "Tu (femme)", tts: "أَنْتِي", type: "mot", lesson: 1 },
-            { ar: "نهدر", tr: "nahder", fr: "(Je) parle", tts: "نَهْدَرْ", type: "mot", lesson: 1 },
-            { ar: "تهدر", tr: "tahder", fr: "(Tu) parles (homme)", tts: "تَهْدَرْ", type: "mot", lesson: 1 },
-            { ar: "تهدري", tr: "tahdri", fr: "(Tu) parles (femme)", tts: "تَهْدْرِي", type: "mot", lesson: 1 },
-            { ar: "نتعلم", tr: "nata'alam", fr: "(J') apprends", tts: "نْتْعَلَّمْ", type: "mot", lesson: 1 },
-            { ar: "صباح الخير", tr: "sabah el hair", fr: "Bonjour", tts: "صَبَاحْ الْخِيرْ", type: "mot", lesson: 1 },
-            { ar: "فرنسي", tr: "fransè", fr: "Français", tts: "فْرَانْسِي", type: "mot", lesson: 1 },
-            { ar: "عربية", tr: "'arbiya", fr: "Arabe", tts: "عَرْبِيَّة", type: "mot", lesson: 1 },
-            { ar: "دارجة دزايرية", tr: "darja dzyrya", fr: "Darja algérien", tts: "دَارْجَة دْزَايْرِيَّة", type: "mot", lesson: 1 },
-            { ar: "أنا نهدر فرنسي", tr: "ana nahder fransè", fr: "Je parle français", tts: "أَنَا نَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
-            { ar: "أنتَ تهدر فرنسي", tr: "enta tahder fransè", fr: "Tu parles français (homme)", tts: "أَنْتَ تَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
-            { ar: "أنتِ تهدري فرنسي؟", tr: "enti tahdri fransè?", fr: "Tu parles français ? (femme)", tts: "أَنْتِي تَهْدْرِي فْرَانْسِي", type: "phrase", lesson: 1 },
-            { ar: "أنا نتعلم دارجة دزايرية", tr: "ana nata'alam darja dzyrya", fr: "J'apprends le darja", tts: "أَنَا نْتْعَلَّمْ دَارْجَة دْزَايْرِيَّة", type: "phrase", lesson: 1 },
-            { ar: "أنا نهدر دارجة دزايرية", tr: "ana nahder darja dzyrya", fr: "Je parle darja", tts: "أَنَا نَهْدَرْ دَارْجَة دْزَايْرِيَّة", type: "phrase", lesson: 1 },
-            { ar: "صباح الخير أنا نهدر فرنسي", tr: "sabah el hair, ana nahder fransè", fr: "Bonjour, je parle français", tts: "صَبَاحْ الْخِيرْ أَنَا نَهْدَرْ فْرَانْسِي", type: "phrase", lesson: 1 },
+            {ar:"أنا",tr:"ana",fr:"Je",tts:"أَنَا",type:"mot",lesson:1},
+            {ar:"أنتَ",tr:"enta",fr:"Tu (homme)",tts:"أَنْتَ",type:"mot",lesson:1},
+            {ar:"أنتِ",tr:"enti",fr:"Tu (femme)",tts:"أَنْتِي",type:"mot",lesson:1},
+            {ar:"نهدر",tr:"nahder",fr:"(Je) parle",tts:"نَهْدَرْ",type:"mot",lesson:1},
+            {ar:"تهدر",tr:"tahder",fr:"(Tu) parles (homme)",tts:"تَهْدَرْ",type:"mot",lesson:1},
+            {ar:"تهدري",tr:"tahdri",fr:"(Tu) parles (femme)",tts:"تَهْدْرِي",type:"mot",lesson:1},
+            {ar:"نتعلم",tr:"nata'alam",fr:"(J') apprends",tts:"نْتْعَلَّمْ",type:"mot",lesson:1},
+            {ar:"صباح الخير",tr:"sabah el hair",fr:"Bonjour",tts:"صَبَاحْ الْخِيرْ",type:"mot",lesson:1},
+            {ar:"فرنسي",tr:"fransè",fr:"Français",tts:"فْرَانْسِي",type:"mot",lesson:1},
+            {ar:"عربية",tr:"'arbiya",fr:"Arabe",tts:"عَرْبِيَّة",type:"mot",lesson:1},
+            {ar:"دارجة دزايرية",tr:"darja dzyrya",fr:"Darja algérien",tts:"دَارْجَة دْزَايْرِيَّة",type:"mot",lesson:1},
+            {ar:"أنا نهدر فرنسي",tr:"ana nahder fransè",fr:"Je parle français",tts:"أَنَا نَهْدَرْ فْرَانْسِي",type:"phrase",lesson:1},
+            {ar:"أنتَ تهدر فرنسي",tr:"enta tahder fransè",fr:"Tu parles français (homme)",tts:"أَنْتَ تَهْدَرْ فْرَانْسِي",type:"phrase",lesson:1},
+            {ar:"أنتِ تهدري فرنسي؟",tr:"enti tahdri fransè?",fr:"Tu parles français ? (femme)",tts:"أَنْتِي تَهْدْرِي فْرَانْسِي",type:"phrase",lesson:1},
+            {ar:"أنا نتعلم دارجة دزايرية",tr:"ana nata'alam darja dzyrya",fr:"J'apprends le darja",tts:"أَنَا نْتْعَلَّمْ دَارْجَة دْزَايْرِيَّة",type:"phrase",lesson:1},
+            {ar:"أنا نهدر دارجة دزايرية",tr:"ana nahder darja dzyrya",fr:"Je parle darja",tts:"أَنَا نَهْدَرْ دَارْجَة دْزَايْرِيَّة",type:"phrase",lesson:1},
+            {ar:"صباح الخير أنا نهدر فرنسي",tr:"sabah el hair, ana nahder fransè",fr:"Bonjour, je parle français",tts:"صَبَاحْ الْخِيرْ أَنَا نَهْدَرْ فْرَانْسِي",type:"phrase",lesson:1},
 
-            // LEÇON 2
-            { ar: "إنتم", tr: "entoum", fr: "Vous (pluriel)", tts: "إِنْتُمْ", type: "mot", lesson: 2 },
-            { ar: "لونگلي", tr: "langlè", fr: "L'anglais", tts: "لُونْغْلِي", type: "mot", lesson: 2 },
-            { ar: "أونگلي", tr: "anglè", fr: "Anglais", tts: "أُونْغْلِي", type: "mot", lesson: 2 },
-            { ar: "أنا نتعلم دارجة دزايرية", tr: "ana nata’alam darja dziri’ya", fr: "J'apprends le darja algérien", tts: "أَنَا نْتْعَلَّمْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "إنتا تتعلم", tr: "enta tata’alam", fr: "Tu apprends (homme)", tts: "إِنْتَا تْتْعَلَّمْ", type: "phrase", lesson: 2 },
-            { ar: "إنتي تتعلمي", tr: "enti tata’alami", fr: "Tu apprends (femme)", tts: "إِنْتِي تْتْعَلَّمِي", type: "phrase", lesson: 2 },
-            { ar: "إنتا تهضر فرونصي", tr: "enta tahdar fransè", fr: "Tu parles français (homme)", tts: "إِنْتَا تَهْدَرْ فْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "إنتا تتعلم فرونصي", tr: "enta tata’alam fransè", fr: "Tu apprends le français (homme)", tts: "إِنْتَا تْتْعَلَّمْ فْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "إنتم تهضرو", tr: "entoum tahdro", fr: "Vous parlez", tts: "إِنْتُمْ تَهْدْرُوا", type: "phrase", lesson: 2 },
-            { ar: "إنتم تهضرو دارجة دزايرية", tr: "entoum tahdro darja dziri’ya", fr: "Vous parlez darja algérien", tts: "إِنْتُمْ تَهْدْرُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "إنتم تتعلمو دارجة دزايرية", tr: "entoum tata’alamou darja dziri’ya", fr: "Vous apprenez le darja", tts: "إِنْتُمْ تْتْعَلْمُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "إنتما تتعلمو دارجة دزايرية؟", tr: "entouma tata’alamou darja dziri’ya?", fr: "Vous apprenez le darja ? (Question)", tts: "إِنْتُمَا تْتْعَلْمُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "إنتيا تتعلمي لفرونصي؟", tr: "entia tata’alami el fransè?", fr: "Tu apprends le français ? (Question femme)", tts: "إِنْتِيَا تْتْعَلْمِي لْفْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "صباح الخير، إنتا تهضر أونگلي؟", tr: "sabah el kheyr, enta tahdar anglè?", fr: "Bonjour, tu parles anglais ?", tts: "صَبَاحْ الْخِيرْ، إِنْتَا تَهْدَرْ أُونْغْلِي", type: "phrase", lesson: 2 },
-            { ar: "إنتما تهضرو فرونصي؟", tr: "entouma tahdro fransè?", fr: "Vous parlez français ?", tts: "إِنْتُمَا تَهْدْرُوا فْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "أنا مانهضرش", tr: "ana ma nahdarsh", fr: "Je ne parle pas", tts: "أَنَا مَانَهْدَرْشْ", type: "phrase", lesson: 2 },
-            { ar: "أنا مانهضرش دارجة دزايرية", tr: "ana ma nahdarsh darja dziri’ya", fr: "Je ne parle pas darja algérien", tts: "أَنَا مَانَهْدَرْشْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 2 },
-            { ar: "أنا مانهضرش فرونصي", tr: "ana ma nahdarsh fransè", fr: "Je ne parle pas français", tts: "أَنَا مَانَهْدَرْشْ فْرُونْصِي", type: "phrase", lesson: 2 },
-            { ar: "أنا مانهضرش أونگلي", tr: "ana ma nahdarsh anglè", fr: "Je ne parle pas anglais", tts: "أَنَا مَانَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 },
-            { ar: "إنتا ماتهضرش أونگلي", tr: "enta ma tahdarsh anglè", fr: "Tu ne parles pas anglais (homme)", tts: "إِنْتَا مَاتَهْدَرْشْ أُونْغْلِي", type: "phrase", lesson: 2 },
+            {ar:"إنتم",tr:"entoum",fr:"Vous (pluriel)",tts:"إِنْتُمْ",type:"mot",lesson:2},
+            {ar:"لونگلي",tr:"langlè",fr:"L'anglais",tts:"لُونْغْلِي",type:"mot",lesson:2},
+            {ar:"أونگلي",tr:"anglè",fr:"Anglais",tts:"أُونْغْلِي",type:"mot",lesson:2},
+            {ar:"أنا نتعلم دارجة دزايرية",tr:"ana nata’alam darja dziri’ya",fr:"J'apprends le darja algérien",tts:"أَنَا نْتْعَلَّمْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:2},
+            {ar:"إنتا تتعلم",tr:"enta tata’alam",fr:"Tu apprends (homme)",tts:"إِنْتَا تْتْعَلَّمْ",type:"phrase",lesson:2},
+            {ar:"إنتي تتعلمي",tr:"enti tata’alami",fr:"Tu apprends (femme)",tts:"إِنْتِي تْتْعَلَّمِي",type:"phrase",lesson:2},
+            {ar:"إنتا تهضر فرونصي",tr:"enta tahdar fransè",fr:"Tu parles français (homme)",tts:"إِنْتَا تَهْدَرْ فْرُونْصِي",type:"phrase",lesson:2},
+            {ar:"إنتا تتعلم فرونصي",tr:"enta tata’alam fransè",fr:"Tu apprends le français (homme)",tts:"إِنْتَا تْتْعَلَّمْ فْرُونْصِي",type:"phrase",lesson:2},
+            {ar:"إنتم تهضرو",tr:"entoum tahdro",fr:"Vous parlez",tts:"إِنْتُمْ تَهْدْرُوا",type:"phrase",lesson:2},
+            {ar:"إنتم تهضرو دارجة دزايرية",tr:"entoum tahdro darja dziri’ya",fr:"Vous parlez darja algérien",tts:"إِنْتُمْ تَهْدْرُوا دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:2},
+            {ar:"إنتم تتعلمو دارجة دزايرية",tr:"entoum tata’alamou darja dziri’ya",fr:"Vous apprenez le darja",tts:"إِنْتُمْ تْتْعَلْمُوا دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:2},
+            {ar:"إنتما تتعلمو دارجة دزايرية؟",tr:"entouma tata’alamou darja dziri’ya?",fr:"Vous apprenez le darja ? (Question)",tts:"إِنْتُمَا تْتْعَلْمُوا دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:2},
+            {ar:"إنتيا تتعلمي لفرونصي؟",tr:"entia tata’alami el fransè?",fr:"Tu apprends le français ? (Question femme)",tts:"إِنْتِيَا تْتْعَلْمِي لْفْرُونْصِي",type:"phrase",lesson:2},
+            {ar:"صباح الخير، إنتا تهضر أونگلي؟",tr:"sabah el kheyr, enta tahdar anglè?",fr:"Bonjour, tu parles anglais ?",tts:"صَبَاحْ الْخِيرْ، إِنْتَا تَهْدَرْ أُونْغْلِي",type:"phrase",lesson:2},
+            {ar:"إنتما تهضرو فرونصي؟",tr:"entouma tahdro fransè?",fr:"Vous parlez français ?",tts:"إِنْتُمَا تَهْدْرُوا فْرُونْصِي",type:"phrase",lesson:2},
+            {ar:"أنا مانهضرش",tr:"ana ma nahdarsh",fr:"Je ne parle pas",tts:"أَنَا مَانَهْدَرْشْ",type:"phrase",lesson:2},
+            {ar:"أنا مانهضرش دارجة دزايرية",tr:"ana ma nahdarsh darja dziri’ya",fr:"Je ne parle pas darja algérien",tts:"أَنَا مَانَهْدَرْشْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:2},
+            {ar:"أنا مانهضرش فرونصي",tr:"ana ma nahdarsh fransè",fr:"Je ne parle pas français",tts:"أَنَا مَانَهْدَرْشْ فْرُونْصِي",type:"phrase",lesson:2},
+            {ar:"أنا مانهضرش أونگلي",tr:"ana ma nahdarsh anglè",fr:"Je ne parle pas anglais",tts:"أَنَا مَانَهْدَرْشْ أُونْغْلِي",type:"phrase",lesson:2},
+            {ar:"إنتا ماتهضرش أونگلي",tr:"enta ma tahdarsh anglè",fr:"Tu ne parles pas anglais (homme)",tts:"إِنْتَا مَاتَهْدَرْشْ أُونْغْلِي",type:"phrase",lesson:2},
 
-            // LEÇON 3
-            { ar: "مليح", tr: "mlyeh", fr: "Bien / Bon", tts: "مْلِيحْ", type: "mot", lesson: 3 },
-            { ar: "أنا نحب", tr: "ana nhab", fr: "J'aime", tts: "أَنَا نْحَبْ", type: "mot", lesson: 3 },
-            { ar: "إنتا تحب", tr: "enta thab", fr: "Tu aimes (homme)", tts: "إِنْتَا تْحَبْ", type: "mot", lesson: 3 },
-            { ar: "إنتي تحبي", tr: "enti thabi", fr: "Tu aimes (femme)", tts: "إِنْتِي تْحَبِّي", type: "mot", lesson: 3 },
-            { ar: "إنتما", tr: "entouma", fr: "Vous", tts: "إِنْتُمَا", type: "mot", lesson: 3 },
-            { ar: "أنا نهضر فرونصي مليح", tr: "ana nahdar fransè mlyeh", fr: "Je parle bien français", tts: "أَنَا نَهْدَرْ فْرُونْصِي مْلِيحْ", type: "phrase", lesson: 3 },
-            { ar: "أنا مانهضرش مليح فرونصي", tr: "ana ma nahdarsh mlyeh fransè", fr: "Je ne parle pas bien français", tts: "أَنَا مَانَهْدَرْشْ مْلِيحْ فْرُونْصِي", type: "phrase", lesson: 3 },
-            { ar: "إنتا تتعلم دارجة دزايرية", tr: "enta tata'alam darja dziri'ya", fr: "Tu apprends le darja algérien (homme)", tts: "إِنْتَا تْتْعَلَّمْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 3 },
-            { ar: "إنتي تتعلمي دارجة دزايرية", tr: "enti tata'alami darja dziri'ya", fr: "Tu apprends le darja algérien (femme)", tts: "إِنْتِي تْتْعَلَّمِي دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 3 },
-            { ar: "إنتما تهضرو مليح دارجة دزايرية", tr: "entouma tahdro mlyeh darja dziri'ya", fr: "Vous parlez bien darja algérien", tts: "إِنْتُمَا تَهْدْرُوا مْلِيحْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 3 },
-            { ar: "إنتيا تهضري مليح فرونصي", tr: "entia tahdri mlyeh fransè", fr: "Tu parles bien français (femme)", tts: "إِنْتِيَا تَهْدْرِي مْلِيحْ فْرُونْصِي", type: "phrase", lesson: 3 },
-            { ar: "أنا نحب نهضر دارجة دزايرية", tr: "ana nhab nahdar darja dziri'ya", fr: "J'aime parler darja algérien", tts: "أَنَا نْحَبْ نَهْدَرْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 3 },
-            { ar: "أنا نحب نتعلم", tr: "ana nhab nata'alam", fr: "J'aime apprendre", tts: "أَنَا نْحَبْ نْتْعَلَّمْ", type: "phrase", lesson: 3 },
-            { ar: "أنا نحب نهضر", tr: "ana nhab nahdar", fr: "J'aime parler", tts: "أَنَا نْحَبْ نَهْدَرْ", type: "phrase", lesson: 3 },
+            {ar:"مليح",tr:"mlyeh",fr:"Bien / Bon",tts:"مْلِيحْ",type:"mot",lesson:3},
+            {ar:"أنا نحب",tr:"ana nhab",fr:"J'aime",tts:"أَنَا نْحَبْ",type:"mot",lesson:3},
+            {ar:"إنتا تحب",tr:"enta thab",fr:"Tu aimes (homme)",tts:"إِنْتَا تْحَبْ",type:"mot",lesson:3},
+            {ar:"إنتي تحبي",tr:"enti thabi",fr:"Tu aimes (femme)",tts:"إِنْتِي تْحَبِّي",type:"mot",lesson:3},
+            {ar:"إنتما",tr:"entouma",fr:"Vous",tts:"إِنْتُمَا",type:"mot",lesson:3},
+            {ar:"أنا نهضر فرونصي مليح",tr:"ana nahdar fransè mlyeh",fr:"Je parle bien français",tts:"أَنَا نَهْدَرْ فْرُونْصِي مْلِيحْ",type:"phrase",lesson:3},
+            {ar:"أنا مانهضرش مليح فرونصي",tr:"ana ma nahdarsh mlyeh fransè",fr:"Je ne parle pas bien français",tts:"أَنَا مَانَهْدَرْشْ مْلِيحْ فْرُونْصِي",type:"phrase",lesson:3},
+            {ar:"إنتا تتعلم دارجة دزايرية",tr:"enta tata'alam darja dziri'ya",fr:"Tu apprends le darja algérien (homme)",tts:"إِنْتَا تْتْعَلَّمْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:3},
+            {ar:"إنتي تتعلمي دارجة دزايرية",tr:"enti tata'alami darja dziri'ya",fr:"Tu apprends le darja algérien (femme)",tts:"إِنْتِي تْتْعَلَّمِي دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:3},
+            {ar:"إنتما تهضرو مليح دارجة دزايرية",tr:"entouma tahdro mlyeh darja dziri'ya",fr:"Vous parlez bien darja algérien",tts:"إِنْتُمَا تَهْدْرُوا مْلِيحْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:3},
+            {ar:"إنتيا تهضري مليح فرونصي",tr:"entia tahdri mlyeh fransè",fr:"Tu parles bien français (femme)",tts:"إِنْتِيَا تَهْدْرِي مْلِيحْ فْرُونْصِي",type:"phrase",lesson:3},
+            {ar:"أنا نحب نهضر دارجة دزايرية",tr:"ana nhab nahdar darja dziri'ya",fr:"J'aime parler darja algérien",tts:"أَنَا نْحَبْ نَهْدَرْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:3},
+            {ar:"أنا نحب نتعلم",tr:"ana nhab nata'alam",fr:"J'aime apprendre",tts:"أَنَا نْحَبْ نْتْعَلَّمْ",type:"phrase",lesson:3},
+            {ar:"أنا نحب نهضر",tr:"ana nhab nahdar",fr:"J'aime parler",tts:"أَنَا نْحَبْ نَهْدَرْ",type:"phrase",lesson:3},
 
-            // LEÇON 4
-            { ar: "حنا", tr: "hna", fr: "Nous", tts: "حْنَا", type: "mot", lesson: 4 },
-            { ar: "نعيش", tr: "neysh", fr: "(Je) vis", tts: "نْعِيشْ", type: "mot", lesson: 4 },
-            { ar: "ف", tr: "fi", fr: "à / dans", tts: "فِي", type: "mot", lesson: 4 },
-            { ar: "دزاير", tr: "dzayer", fr: "Algérie", tts: "دْزَايَرْ", type: "mot", lesson: 4 },
-            { ar: "فرانسا", tr: "fransa", fr: "France", tts: "فْرَانْسَا", type: "mot", lesson: 4 },
-            { ar: "لهنا", tr: "lehna", fr: "Ici", tts: "لَهْنَا", type: "mot", lesson: 4 },
-            { ar: "أنا مانتعلمش", tr: "ana ma nata'alamsh", fr: "Je n'apprends pas", tts: "أَنَا مَانْتْعَلَّمْشْ", type: "phrase", lesson: 4 },
-            { ar: "أنا مانحبش", tr: "ana ma nhabesh", fr: "Je n'aime pas", tts: "أَنَا مَانْحَبْشْ", type: "phrase", lesson: 4 },
-            { ar: "إنتما تهضرو", tr: "entouma tahdrou", fr: "Vous parlez", tts: "إِنْتُمَا تَهْدْرُوا", type: "phrase", lesson: 4 },
-            { ar: "إنتم تتعلمو", tr: "entoum tata'alamou", fr: "Vous apprenez", tts: "إِنْتُمْ تْتْعَلْمُوا", type: "phrase", lesson: 4 },
-            { ar: "إنتم تحبو", tr: "entoum thabou", fr: "Vous aimez", tts: "إِنْتُمْ تْحَبُّوا", type: "phrase", lesson: 4 },
-            { ar: "أنا نحب نعيش ف دزاير", tr: "ana nhab neysh fi dzayer", fr: "J'aime vivre en Algérie", tts: "أَنَا نْحَبْ نْعِيشْ فِي دْزَايَرْ", type: "phrase", lesson: 4 },
-            { ar: "إنتي تحبي تعيشي ف دزاير", tr: "enti thabi teyshi fi dzayer", fr: "Tu aimes vivre en Algérie (femme)", tts: "إِنْتِي تْحَبِّي تْعِيشِي فِي دْزَايَرْ", type: "phrase", lesson: 4 },
-            { ar: "إنتا تحب تعيش ف دزاير", tr: "enta thab teysh fi dzayer", fr: "Tu aimes vivre en Algérie (homme)", tts: "إِنْتَا تْحَبْ تْعِيشْ فِي دْزَايَرْ", type: "phrase", lesson: 4 },
-            { ar: "إنتا تحب تعيش ف فرانسا", tr: "enta thab teysh fi fransa", fr: "Tu aimes vivre en France (homme)", tts: "إِنْتَا تْحَبْ تْعِيشْ فِي فْرَانْسَا", type: "phrase", lesson: 4 },
-            { ar: "إنتما تحبو تعيشو ف فرانسا", tr: "entouma thabou teyshou fi fransa", fr: "Vous aimez vivre en France", tts: "إِنْتُمَا تْحَبُّوا تْعِيشُوا فِي فْرَانْسَا", type: "phrase", lesson: 4 },
-            { ar: "نحب نعيش لهنا", tr: "nhab neysh lehna", fr: "J'aime vivre ici", tts: "نْحَبْ نْعِيشْ لَهْنَا", type: "phrase", lesson: 4 },
-            { ar: "أنا نحب نعيش لهنا", tr: "ana nhab neysh lehna", fr: "J'aime vivre ici (avec pronom)", tts: "أَنَا نْحَبْ نْعِيشْ لَهْنَا", type: "phrase", lesson: 4 },
-            { ar: "إنتما تحبو تعيشو لهنا؟", tr: "entouma thabou teyshou lehna?", fr: "Vous aimez vivre ici ?", tts: "إِنْتُمَا تْحَبُّوا تْعِيشُوا لَهْنَا", type: "phrase", lesson: 4 },
-            { ar: "حنا نهضرو", tr: "hna nahdrou", fr: "Nous parlons", tts: "حْنَا نَهْدْرُوا", type: "phrase", lesson: 4 },
-            { ar: "حنا نتعلمو", tr: "hna nata'alamou", fr: "Nous apprenons", tts: "حْنَا نْتْعَلْمُوا", type: "phrase", lesson: 4 },
+            {ar:"حنا",tr:"hna",fr:"Nous",tts:"حْنَا",type:"mot",lesson:4},
+            {ar:"نعيش",tr:"neysh",fr:"(Je) vis",tts:"نْعِيشْ",type:"mot",lesson:4},
+            {ar:"ف",tr:"fi",fr:"à / dans",tts:"فِي",type:"mot",lesson:4},
+            {ar:"دزاير",tr:"dzayer",fr:"Algérie",tts:"دْزَايَرْ",type:"mot",lesson:4},
+            {ar:"فرانسا",tr:"fransa",fr:"France",tts:"فْرَانْسَا",type:"mot",lesson:4},
+            {ar:"لهنا",tr:"lehna",fr:"Ici",tts:"لَهْنَا",type:"mot",lesson:4},
+            {ar:"أنا مانتعلمش",tr:"ana ma nata'alamsh",fr:"Je n'apprends pas",tts:"أَنَا مَانْتْعَلَّمْشْ",type:"phrase",lesson:4},
+            {ar:"أنا مانحبش",tr:"ana ma nhabesh",fr:"Je n'aime pas",tts:"أَنَا مَانْحَبْشْ",type:"phrase",lesson:4},
+            {ar:"إنتما تهضرو",tr:"entouma tahdrou",fr:"Vous parlez",tts:"إِنْتُمَا تَهْدْرُوا",type:"phrase",lesson:4},
+            {ar:"إنتم تتعلمو",tr:"entoum tata'alamou",fr:"Vous apprenez",tts:"إِنْتُمْ تْتْعَلْمُوا",type:"phrase",lesson:4},
+            {ar:"إنتم تحبو",tr:"entoum thabou",fr:"Vous aimez",tts:"إِنْتُمْ تْحَبُّوا",type:"phrase",lesson:4},
+            {ar:"أنا نحب نعيش ف دزاير",tr:"ana nhab neysh fi dzayer",fr:"J'aime vivre en Algérie",tts:"أَنَا نْحَبْ نْعِيشْ فِي دْزَايَرْ",type:"phrase",lesson:4},
+            {ar:"إنتي تحبي تعيشي ف دزاير",tr:"enti thabi teyshi fi dzayer",fr:"Tu aimes vivre en Algérie (femme)",tts:"إِنْتِي تْحَبِّي تْعِيشِي فِي دْزَايَرْ",type:"phrase",lesson:4},
+            {ar:"إنتا تحب تعيش ف دزاير",tr:"enta thab teysh fi dzayer",fr:"Tu aimes vivre en Algérie (homme)",tts:"إِنْتَا تْحَبْ تْعِيشْ فِي دْزَايَرْ",type:"phrase",lesson:4},
+            {ar:"إنتا تحب تعيش ف فرانسا",tr:"enta thab teysh fi fransa",fr:"Tu aimes vivre en France (homme)",tts:"إِنْتَا تْحَبْ تْعِيشْ فِي فْرَانْسَا",type:"phrase",lesson:4},
+            {ar:"إنتما تحبو تعيشو ف فرانسا",tr:"entouma thabou teyshou fi fransa",fr:"Vous aimez vivre en France",tts:"إِنْتُمَا تْحَبُّوا تْعِيشُوا فِي فْرَانْسَا",type:"phrase",lesson:4},
+            {ar:"نحب نعيش لهنا",tr:"nhab neysh lehna",fr:"J'aime vivre ici",tts:"نْحَبْ نْعِيشْ لَهْنَا",type:"phrase",lesson:4},
+            {ar:"أنا نحب نعيش لهنا",tr:"ana nhab neysh lehna",fr:"J'aime vivre ici (avec pronom)",tts:"أَنَا نْحَبْ نْعِيشْ لَهْنَا",type:"phrase",lesson:4},
+            {ar:"إنتما تحبو تعيشو لهنا؟",tr:"entouma thabou teyshou lehna?",fr:"Vous aimez vivre ici ?",tts:"إِنْتُمَا تْحَبُّوا تْعِيشُوا لَهْنَا",type:"phrase",lesson:4},
+            {ar:"حنا نهضرو",tr:"hna nahdrou",fr:"Nous parlons",tts:"حْنَا نَهْدْرُوا",type:"phrase",lesson:4},
+            {ar:"حنا نتعلمو",tr:"hna nata'alamou",fr:"Nous apprenons",tts:"حْنَا نْتْعَلْمُوا",type:"phrase",lesson:4},
 
-            // LEÇON 5
-            { ar: "نعيشو", tr: "neyshou", fr: "Nous vivons", tts: "نْعِيشُوا", type: "mot", lesson: 5 },
-            { ar: "آه / لا", tr: "eh / la", fr: "Oui / Non", tts: "إِيهْ / لَا", type: "mot", lesson: 5 },
-            { ar: "آه", tr: "eh", fr: "Oui", tts: "إِيهْ", type: "mot", lesson: 5 },
-            { ar: "حنا نحبو", tr: "hna nhabou", fr: "Nous aimons", tts: "حْنَا نْحَبُّوا", type: "phrase", lesson: 5 },
-            { ar: "حنا نحبو نعيشو لهنا", tr: "hna nhabou neyshou lehna", fr: "Nous aimons vivre ici", tts: "حْنَا نْحَبُّوا نْعِيشُوا لَهْنَا", type: "phrase", lesson: 5 },
-            { ar: "حنا نحبو نعيشو", tr: "hna nhabou neyshou", fr: "Nous aimons vivre", tts: "حْنَا نْحَبُّوا نْعِيشُوا", type: "phrase", lesson: 5 },
-            { ar: "حنا نحبو نهضرو دارجة دزايرية", tr: "hna nhabou nahdrou darja dziri'ya", fr: "Nous aimons parler darja algérien", tts: "حْنَا نْحَبُّوا نَهْدْرُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 5 },
-            { ar: "إنتما تهضرو دارجة دزايرية؟", tr: "entouma tahdrou darja dziri'ya ?", fr: "Vous parlez darja algérien ?", tts: "إِنْتُمَا تَهْدْرُوا دَارْجَة دْزِيرِيَّة؟", type: "phrase", lesson: 5 },
-            { ar: "إنتا تهضر فرونصي؟", tr: "enta tahdar fransè?", fr: "Tu parles français ?", tts: "إِنْتَا تَهْدَرْ فْرُونْصِي؟", type: "phrase", lesson: 5 },
-            { ar: "آه، أنا نهضر دارجة دزايرية", tr: "eh, ana nahdar darja dziri'ya", fr: "Oui, je parle darja algérien", tts: "إِيهْ، أَنَا نَهْدَرْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 5 },
-            { ar: "حنا نهضرو دارجة دزايرية", tr: "hna nahdrou darja dziri'ya", fr: "Nous parlons darja algérien", tts: "حْنَا نَهْدْرُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 5 },
-            { ar: "حنا مانهضروش دارجة دزايرية", tr: "hna ma nahdroush darja dziri'ya", fr: "Nous ne parlons pas darja algérien", tts: "حْنَا مَانَهْدْرُوشْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 5 },
-            { ar: "حنا مانهضروش", tr: "hna ma nahdroush", fr: "Nous ne parlons pas", tts: "حْنَا مَانَهْدْرُوشْ", type: "phrase", lesson: 5 },
-            { ar: "حنا مانهضروش فرونصي", tr: "hna ma nahdroush fransè", fr: "Nous ne parlons pas français", tts: "حْنَا مَانَهْدْرُوشْ فْرُونْصِي", type: "phrase", lesson: 5 },
-            { ar: "حنا نحبو نعيشو ف دزاير", tr: "hna nhabou neyshou fi dzayer", fr: "Nous aimons vivre en Algérie", tts: "حْنَا نْحَبُّوا نْعِيشُوا فِي دْزَايَرْ", type: "phrase", lesson: 5 },
-            { ar: "صباح الخير، إنتا تهضر أونگلي؟", tr: "sabah el kheyr, enta tahdar angle?", fr: "Bonjour, tu parles anglais ?", tts: "صَبَاحْ الْخِيرْ، إِنْتَا تَهْدَرْ أُونْغْلِي؟", type: "phrase", lesson: 5 },
-            { ar: "آه، حنا نهضرو دارجة دزايرية", tr: "eh, hna nahdrou darja dziri'ya", fr: "Oui, nous parlons darja algérien", tts: "إِيهْ، حْنَا نَهْدْرُوا دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 5 },
+            {ar:"نعيشو",tr:"neyshou",fr:"Nous vivons",tts:"نْعِيشُوا",type:"mot",lesson:5},
+            {ar:"آه / لا",tr:"eh / la",fr:"Oui / Non",tts:"إِيهْ / لَا",type:"mot",lesson:5},
+            {ar:"آه",tr:"eh",fr:"Oui",tts:"إِيهْ",type:"mot",lesson:5},
+            {ar:"حنا نحبو",tr:"hna nhabou",fr:"Nous aimons",tts:"حْنَا نْحَبُّوا",type:"phrase",lesson:5},
+            {ar:"حنا نحبو نعيشو لهنا",tr:"hna nhabou neyshou lehna",fr:"Nous aimons vivre ici",tts:"حْنَا نْحَبُّوا نْعِيشُوا لَهْنَا",type:"phrase",lesson:5},
+            {ar:"حنا نحبو نعيشو",tr:"hna nhabou neyshou",fr:"Nous aimons vivre",tts:"حْنَا نْحَبُّوا نْعِيشُوا",type:"phrase",lesson:5},
+            {ar:"حنا نحبو نهضرو دارجة دزايرية",tr:"hna nhabou nahdrou darja dziri'ya",fr:"Nous aimons parler darja",tts:"حْنَا نْحَبُّوا نَهْدْرُوا دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:5},
+            {ar:"إنتما تهضرو دارجة دزايرية؟",tr:"entouma tahdrou darja dziri'ya ?",fr:"Vous parlez darja algérien ?",tts:"إِنْتُمَا تَهْدْرُوا دَارْجَة دْزِيرِيَّة؟",type:"phrase",lesson:5},
+            {ar:"إنتا تهضر فرونصي؟",tr:"enta tahdar fransè?",fr:"Tu parles français ?",tts:"إِنْتَا تَهْدَرْ فْرُونْصِي؟",type:"phrase",lesson:5},
+            {ar:"آه، أنا نهضر دارجة دزايرية",tr:"eh, ana nahdar darja dziri'ya",fr:"Oui, je parle darja",tts:"إِيهْ، أَنَا نَهْدَرْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:5},
+            {ar:"حنا نهضرو دارجة دزايرية",tr:"hna nahdrou darja dziri'ya",fr:"Nous parlons darja",tts:"حْنَا نَهْدْرُوا دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:5},
+            {ar:"حنا مانهضروش دارجة دزايرية",tr:"hna ma nahdroush darja dziri'ya",fr:"Nous ne parlons pas darja",tts:"حْنَا مَانَهْدْرُوشْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:5},
+            {ar:"حنا مانهضروش",tr:"hna ma nahdroush",fr:"Nous ne parlons pas",tts:"حْنَا مَانَهْدْرُوشْ",type:"phrase",lesson:5},
+            {ar:"حنا مانهضروش فرونصي",tr:"hna ma nahdroush fransè",fr:"Nous ne parlons pas français",tts:"حْنَا مَانَهْدْرُوشْ فْرُونْصِي",type:"phrase",lesson:5},
+            {ar:"حنا نحبو نعيشو ف دزاير",tr:"hna nhabou neyshou fi dzayer",fr:"Nous aimons vivre en Algérie",tts:"حْنَا نْحَبُّوا نْعِيشُوا فِي دْزَايَرْ",type:"phrase",lesson:5},
+            {ar:"صباح الخير، إنتا تهضر أونگلي؟",tr:"sabah el kheyr, enta tahdar angle?",fr:"Bonjour, tu parles anglais ?",tts:"صَبَاحْ الْخِيرْ، إِنْتَا تَهْدَرْ أُونْغْلِي؟",type:"phrase",lesson:5},
+            {ar:"آه، حنا نهضرو دارجة دزايرية",tr:"eh, hna nahdrou darja dziri'ya",fr:"Oui, nous parlons darja",tts:"إِيهْ، حْنَا نَهْدْرُوا دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:5},
 
-            // --- LEÇON 6 ---
-            { ar: "بلاد", tr: "blad", fr: "Pays", tts: "بْلَادْ", type: "mot", lesson: 6 },
-            { ar: "بلادي", tr: "bladi", fr: "Mon pays", tts: "بْلَادِي", type: "mot", lesson: 6 },
-            { ar: "بلادك", tr: "bladek", fr: "Ton pays", tts: "بْلَادَكْ", type: "mot", lesson: 6 },
-            { ar: "كتاب", tr: "ktab", fr: "Livre", tts: "كْتَابْ", type: "mot", lesson: 6 },
-            { ar: "كتابي", tr: "ktabi", fr: "Mon livre", tts: "كْتَابِي", type: "mot", lesson: 6 },
-            { ar: "خدمة", tr: "khadma", fr: "Travail / Emploi", tts: "خَدْمَة", type: "mot", lesson: 6 },
-            { ar: "للعاصمة", tr: "lel a'asema", fr: "À la capitale", tts: "لْلْعَاصِمَة", type: "mot", lesson: 6 },
-            
-            { ar: "لا، حنا مانهضروش دارجة دزايرية", tr: "la, hna ma nahdroush darjia dzyriya", fr: "Non, nous ne parlons pas darja algérien", tts: "لَا، حْنَا مَانَهْدْرُوشْ دَارْجَة دْزِيرِيَّة", type: "phrase", lesson: 6 },
-            { ar: "أنا نحب بلادي", tr: "ana nhab bladi", fr: "J'aime mon pays", tts: "أَنَا نْحَبْ بْلَادِي", type: "phrase", lesson: 6 },
-            { ar: "أنا نحب بلادك", tr: "ana nhab bladek", fr: "J'aime ton pays", tts: "أَنَا نْحَبْ بْلَادَكْ", type: "phrase", lesson: 6 },
-            { ar: "الخدمة تاعي", tr: "el khadma ta'y", fr: "Mon travail", tts: "الْخَدْمَة تَاعِي", type: "phrase", lesson: 6 },
-            { ar: "الخدمة تاعك", tr: "el khadma ta'ek", fr: "Ton travail", tts: "الْخَدْمَة تَاعَكْ", type: "phrase", lesson: 6 },
-            { ar: "إنتي تحبي خدمتك؟", tr: "enti thabi khadmatek?", fr: "Tu aimes ton travail ? (femme)", tts: "إِنْتِي تْحَبِّي خَدْمْتَكْ؟", type: "phrase", lesson: 6 },
-            { ar: "آه، أنا نحب خدمتي", tr: "eh, ana nhab khadmaty", fr: "Oui, j'aime mon travail", tts: "إِيهْ، أَنَا نْحَبْ خَدْمْتِي", type: "phrase", lesson: 6 },
-            { ar: "أنا نروح", tr: "ana nroh", fr: "Je vais", tts: "أَنَا نْرُوحْ", type: "phrase", lesson: 6 },
-            { ar: "أنا نروح لفرانسا", tr: "ana nroh la fransa", fr: "Je vais en France", tts: "أَنَا نْرُوحْ لْفْرَانْسَا", type: "phrase", lesson: 6 },
-            { ar: "أنا نروح ل دزاير", tr: "ana nroh la dzayer", fr: "Je vais en Algérie", tts: "أَنَا نْرُوحْ لْدْزَايَرْ", type: "phrase", lesson: 6 },
-            { ar: "أنا مانروحش لدزاير", tr: "ana ma nrohsh la dzayer", fr: "Je ne vais pas en Algérie", tts: "أَنَا مَانْرُوحْشْ لْدْزَايَرْ", type: "phrase", lesson: 6 },
-            { ar: "أنا مانروحش", tr: "ana ma nrohsh", fr: "Je ne vais pas", tts: "أَنَا مَانْرُوحْشْ", type: "phrase", lesson: 6 },
-            { ar: "إنتي تروحي للعاصمة", tr: "enti trohi lel a'asema", fr: "Tu vas à la capitale (femme)", tts: "إِنْتِي تْرُوحِي لْلْعَاصِمَة", type: "phrase", lesson: 6 }
+            {ar:"بلاد",tr:"blad",fr:"Pays",tts:"بْلَادْ",type:"mot",lesson:6},
+            {ar:"بلادي",tr:"bladi",fr:"Mon pays",tts:"بْلَادِي",type:"mot",lesson:6},
+            {ar:"بلادك",tr:"bladek",fr:"Ton pays",tts:"بْلَادَكْ",type:"mot",lesson:6},
+            {ar:"كتاب",tr:"ktab",fr:"Livre",tts:"كْتَابْ",type:"mot",lesson:6},
+            {ar:"كتابي",tr:"ktabi",fr:"Mon livre",tts:"كْتَابِي",type:"mot",lesson:6},
+            {ar:"خدمة",tr:"khadma",fr:"Travail",tts:"خَدْمَة",type:"mot",lesson:6},
+            {ar:"للعاصمة",tr:"lel a'asema",fr:"À la capitale",tts:"لْلْعَاصِمَة",type:"mot",lesson:6},
+            {ar:"لا، حنا مانهضروش دارجة دزايرية",tr:"la, hna ma nahdroush darjia dzyriya",fr:"Non, nous ne parlons pas darja",tts:"لَا، حْنَا مَانَهْدْرُوشْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:6},
+            {ar:"أنا نحب بلادي",tr:"ana nhab bladi",fr:"J'aime mon pays",tts:"أَنَا نْحَبْ بْلَادِي",type:"phrase",lesson:6},
+            {ar:"أنا نحب بلادك",tr:"ana nhab bladek",fr:"J'aime ton pays",tts:"أَنَا نْحَبْ بْلَادَكْ",type:"phrase",lesson:6},
+            {ar:"الخدمة تاعي",tr:"el khadma ta'y",fr:"Mon travail",tts:"الْخَدْمَة تَاعِي",type:"phrase",lesson:6},
+            {ar:"الخدمة تاعك",tr:"el khadma ta'ek",fr:"Ton travail",tts:"الْخَدْمَة تَاعَكْ",type:"phrase",lesson:6},
+            {ar:"إنتي تحبي خدمتك؟",tr:"enti thabi khadmatek?",fr:"Tu aimes ton travail ? (femme)",tts:"إِنْتِي تْحَبِّي خَدْمْتَكْ؟",type:"phrase",lesson:6},
+            {ar:"آه، أنا نحب خدمتي",tr:"eh, ana nhab khadmaty",fr:"Oui, j'aime mon travail",tts:"إِيهْ، أَنَا نْحَبْ خَدْمْتِي",type:"phrase",lesson:6},
+            {ar:"أنا نروح",tr:"ana nroh",fr:"Je vais",tts:"أَنَا نْرُوحْ",type:"phrase",lesson:6},
+            {ar:"أنا نروح لفرانسا",tr:"ana nroh la fransa",fr:"Je vais en France",tts:"أَنَا نْرُوحْ لْفْرَانْسَا",type:"phrase",lesson:6},
+            {ar:"أنا نروح ل دزاير",tr:"ana nroh la dzayer",fr:"Je vais en Algérie",tts:"أَنَا نْرُوحْ لْدْزَايَرْ",type:"phrase",lesson:6},
+            {ar:"أنا مانروحش لدزاير",tr:"ana ma nrohsh la dzayer",fr:"Je ne vais pas en Algérie",tts:"أَنَا مَانْرُوحْشْ لْدْزَايَرْ",type:"phrase",lesson:6},
+            {ar:"أنا مانروحش",tr:"ana ma nrohsh",fr:"Je ne vais pas",tts:"أَنَا مَانْرُوحْشْ",type:"phrase",lesson:6},
+            {ar:"إنتي تروحي للعاصمة",tr:"enti trohi lel a'asema",fr:"Tu vas à la capitale (femme)",tts:"إِنْتِي تْرُوحِي لْلْعَاصِمَة",type:"phrase",lesson:6},
+
+            {ar:"لا",tr:"la",fr:"Non",tts:"لَا",type:"mot",lesson:7},
+            {ar:"أنا نحب",tr:"ana nhab",fr:"J'aime",tts:"أَنَا نْحَبْ",type:"mot",lesson:7},
+            {ar:"إنتا تحب",tr:"enta thab",fr:"Tu aimes (homme)",tts:"إِنْتَا تْحَبْ",type:"mot",lesson:7},
+            {ar:"أنا نهضر",tr:"ana nahder",fr:"Je parle",tts:"أَنَا نَهْدَرْ",type:"mot",lesson:7},
+            {ar:"أنا نتعلم",tr:"ana nata'alam",fr:"J'apprends",tts:"أَنَا نْتْعَلَّمْ",type:"mot",lesson:7},
+            {ar:"أنا نروح",tr:"ana nroh",fr:"Je vais",tts:"أَنَا نْرُوحْ",type:"mot",lesson:7},
+            {ar:"إنتا تروح للعاصمة",tr:"enta troh lel a'asema",fr:"Tu vas à la capitale (homme)",tts:"إِنْتَا تْرُوحْ لْلْعَاصِمَة",type:"phrase",lesson:7},
+            {ar:"أنا نحب نعيش",tr:"ana nhab na'esh",fr:"J'aime vivre",tts:"أَنَا نْحَبْ نْعِيشْ",type:"phrase",lesson:7},
+            {ar:"أنا نحب نعيش ف دزاير",tr:"ana nhab na'esh fi dzayer",fr:"J'aime vivre en Algérie",tts:"أَنَا نْحَبْ نْعِيشْ فِي دْزَايَرْ",type:"phrase",lesson:7},
+            {ar:"أنا نحب نروح ل دزاير",tr:"ana nhab nroh la dzayer",fr:"J'aime aller en Algérie",tts:"أَنَا نْحَبْ نْرُوحْ لْدْزَايَرْ",type:"phrase",lesson:7},
+            {ar:"أنا مانحبش نعيش ف باريس",tr:"ana ma nhabsh na'esh fi Pari",fr:"Je n'aime pas vivre à Paris",tts:"أَنَا مَانْحَبْشْ نْعِيشْ فِي بَارِيسْ",type:"phrase",lesson:7},
+            {ar:"إنتي تهضري دارجة دزايرية",tr:"enti tahdri darjia dzirya",fr:"Tu parles darja (femme)",tts:"إِنْتِي تَهْدْرِي دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:7},
+            {ar:"إنتا تهضر دارجة دزايرية",tr:"enta tahder darjia dzirya",fr:"Tu parles darja (homme)",tts:"إِنْتَا تَهْدَرْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:7},
+            {ar:"آه، أنا نهضر دارجة دزايرية",tr:"eh, ana nahder darjia dzirya",fr:"Oui, je parle darja",tts:"إِيهْ، أَنَا نَهْدَرْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:7},
+            {ar:"لا، أنا مانهضرش دارجة دزايرية",tr:"la, ana ma nahdersh darjia dzirya",fr:"Non, je ne parle pas darja",tts:"لَا، أَنَا مَانَهْدَرْشْ دَارْجَة دْزِيرِيَّة",type:"phrase",lesson:7},
+            {ar:"إنتي تتعلمي العربية",tr:"enti tata'alami el a'arbiya",fr:"Tu apprends l'arabe (femme)",tts:"إِنْتِي تْتْعَلْمِي الْعَرْبِيَّة",type:"phrase",lesson:7},
+            {ar:"إنتا تتعلم العربية",tr:"enta tata'alam el a'arbiya",fr:"Tu apprends l'arabe (homme)",tts:"إِنْتَا تْتْعَلَّمْ الْعَرْبِيَّة",type:"phrase",lesson:7},
+            {ar:"أنا نروح ل دزاير",tr:"ana nroh la dzayer",fr:"Je vais en Algérie",tts:"أَنَا نْرُوحْ لْدْزَايَرْ",type:"phrase",lesson:7},
+            {ar:"إنتا تروح ل دزاير",tr:"enta troh la dzayer",fr:"Tu vas en Algérie (homme)",tts:"إِنْتَا تْرُوحْ لْدْزَايَرْ",type:"phrase",lesson:7},
+            {ar:"إنتي تروحي ل دزاير",tr:"enti trohi la dzayer",fr:"Tu vas en Algérie (femme)",tts:"إِنْتِي تْرُوحِي لْدْزَايَرْ",type:"phrase",lesson:7},
+            {ar:"إنتي تحبي تروحي ل فرانسا؟",tr:"enti thabi trohi la fransa?",fr:"Tu aimes aller en France ? (femme)",tts:"إِنْتِي تْحَبِّي تْرُوحِي لْفْرَانْسَا؟",type:"phrase",lesson:7},
+
+            {ar:"أنا مانهضرش",tr:"ana ma nahdarsh",fr:"Je ne parle pas",tts:"أَنَا مَانَهْدَرْشْ",type:"phrase",lesson:8},
+            {ar:"أنا مانتعلمش",tr:"ana ma nata'alamsh",fr:"Je n'apprends pas",tts:"أَنَا مَانْتْعَلَّمْشْ",type:"phrase",lesson:8},
+            {ar:"أنا مانحبش",tr:"ana ma nhabsh",fr:"Je n'aime pas",tts:"أَنَا مَانْحَبْشْ",type:"phrase",lesson:8},
+            {ar:"أنا مانروحش",tr:"ana ma nrohsh",fr:"Je ne vais pas",tts:"أَنَا مَانْرُوحْشْ",type:"phrase",lesson:8},
+            {ar:"حنا نهضرو",tr:"hna nahdro",fr:"Nous parlons",tts:"حْنَا نَهْدْرُوا",type:"phrase",lesson:8},
+            {ar:"حنا نتعلمو",tr:"hna nata'alamo",fr:"Nous apprenons",tts:"حْنَا نْتْعَلْمُوا",type:"phrase",lesson:8},
+            {ar:"حنا نحبو",tr:"hna nhabou",fr:"Nous aimons",tts:"حْنَا نْحَبُّوا",type:"phrase",lesson:8},
+            {ar:"حنا نروحو",tr:"hna nroho",fr:"Nous allons",tts:"حْنَا نْرُوحُوا",type:"phrase",lesson:8},
+            {ar:"حنا مانروحوش",tr:"hna ma nrohosh",fr:"Nous n'allons pas",tts:"حْنَا مَانْرُوحُوشْ",type:"phrase",lesson:8},
+            {ar:"حنا نروحو ل دزاير",tr:"hna nroho la dzayer",fr:"Nous allons en Algérie",tts:"حْنَا نْرُوحُوا لْدْزَايَرْ",type:"phrase",lesson:8},
+            {ar:"ل دزاير",tr:"la dzayer",fr:"En Algérie",tts:"لْدْزَايَرْ",type:"mot",lesson:8},
+            {ar:"للعاصمة",tr:"lel a'asema",fr:"À la capitale",tts:"لْلْعَاصِمَة",type:"mot",lesson:8},
+            {ar:"حنا نروحو للعاصمة",tr:"hna nroho lel a'asema",fr:"Nous allons à la capitale",tts:"حْنَا نْرُوحُوا لْلْعَاصِمَة",type:"phrase",lesson:8},
+            {ar:"كل يوم",tr:"koul youm",fr:"Tous les jours",tts:"كُلْ يُومْ",type:"mot",lesson:8},
+            {ar:"اليوم",tr:"el youm",fr:"Aujourd'hui",tts:"الْيُومْ",type:"mot",lesson:8},
+            {ar:"أنا نهضر دارجة دزايرية كل يوم",tr:"ana nahder darjia dzyriya koul youm",fr:"Je parle darja tous les jours",tts:"أَنَا نَهْدَرْ دَارْجَة دْزِيرِيَّة كُلْ يُومْ",type:"phrase",lesson:8},
+            {ar:"إنتايا تهضر دارجة دزايرية كل يوم؟",tr:"entaya tahder darjia dzyriya koul youm?",fr:"Tu parles darja tous les jours ? (homme)",tts:"إِنْتَايَا تَهْدَرْ دَارْجَة دْزِيرِيَّة كُلْ يُومْ؟",type:"phrase",lesson:8},
+            {ar:"إنتيا تهضري دارجة دزايرية كل يوم؟",tr:"entya tahdri darjia dzyriya koul youm?",fr:"Tu parles darja tous les jours ? (femme)",tts:"إِنْتِيَا تَهْدْرِي دَارْجَة دْزِيرِيَّة كُلْ يُومْ؟",type:"phrase",lesson:8},
+            {ar:"إنتما تهضرو دارجة دزايرية كل يوم؟",tr:"entouma tahdro darjia dzyriya koul youm?",fr:"Vous parlez darja tous les jours ?",tts:"إِنْتُمَا تَهْدْرُوا دَارْجَة دْزِيرِيَّة كُلْ يُومْ؟",type:"phrase",lesson:8},
+            {ar:"أنا نتعلم دارجة دزايرية كل يوم",tr:"ana nata'alam darjia dzyriya koul youm",fr:"J'apprends le darja tous les jours",tts:"أَنَا نْتْعَلَّمْ دَارْجَة دْزِيرِيَّة كُلْ يُومْ",type:"phrase",lesson:8},
+            {ar:"معاك نتا",tr:"ma'ak enta",fr:"Avec toi (homme)",tts:"مْعَاكْ نْتَا",type:"mot",lesson:8},
+            {ar:"معاك نتي",tr:"ma'ak enti",fr:"Avec toi (femme)",tts:"مْعَاكْ نْتِي",type:"mot",lesson:8},
+            {ar:"أنا نتعلم معاك نتي",tr:"ana nata'alam ma'ak enti",fr:"J'apprends avec toi (femme)",tts:"أَنَا نْتْعَلَّمْ مْعَاكْ نْتِي",type:"phrase",lesson:8},
+            {ar:"أنا نتعلم معاك نتي كل يوم",tr:"ana nata'alam ma'ak enti koul youm",fr:"J'apprends avec toi tous les jours (femme)",tts:"أَنَا نْتْعَلَّمْ مْعَاكْ نْتِي كُلْ يُومْ",type:"phrase",lesson:8},
+
+            // LEÇON 9 (Nouveau)
+            {ar:"معاك نتا",tr:"ma'ak enta",fr:"Avec toi (homme)",tts:"مْعَاكْ نْتَا",type:"mot",lesson:9},
+            {ar:"معاكم نتوما",tr:"ma'akoum ntouma",fr:"Avec vous",tts:"مْعَاكُمْ نْتُومَا",type:"mot",lesson:9},
+            {ar:"كل عام",tr:"koul a'am",fr:"Chaque année",tts:"كُلْ عَامْ",type:"mot",lesson:9},
+            {ar:"هاد لمدينة",tr:"had el medina",fr:"Cette ville",tts:"هَادْ لْمْدِينَة",type:"mot",lesson:9},
+            {ar:"ف هاد لمدينة",tr:"fhad el medina",fr:"Dans cette ville",tts:"فْ هَادْ لْمْدِينَة",type:"mot",lesson:9},
+            {ar:"أنا نهدر دارجة دزايرية معاك نتيا كل يوم",tr:"ana nahdar darjia dzyriya ma’ak ntiya koul youm",fr:"Je parle darja avec toi tous les jours (femme)",tts:"أَنَا نَهْدَرْ دَارْجَة دْزِيرِيَّة مْعَاكْ نْتِيَا كُلْ يُومْ",type:"phrase",lesson:9},
+            {ar:"أنا نروح للدزاير",tr:"ana nrouh l eddzayr",fr:"Je vais en Algérie",tts:"أَنَا نْرُوحْ لْدْزَايَرْ",type:"phrase",lesson:9},
+            {ar:"أنا نروح للدزاير كل عام",tr:"ana nrouh l eddzayr koul a’am",fr:"Je vais en Algérie chaque année",tts:"أَنَا نْرُوحْ لْدْزَايَرْ كُلْ عَامْ",type:"phrase",lesson:9},
+            {ar:"أنا نروح للدزاير معاك نتا",tr:"ana nrouh l eddzayr ma’ak nta",fr:"Je vais en Algérie avec toi (homme)",tts:"أَنَا نْرُوحْ لْدْزَايَرْ مْعَاكْ نْتَا",type:"phrase",lesson:9},
+            {ar:"أنا نحب نعيش ف دزاير",tr:"ana nhab n’aich fi dzayr",fr:"J'aime vivre en Algérie",tts:"أَنَا نْحَبْ نْعِيشْ فِي دْزَايَرْ",type:"phrase",lesson:9},
+            {ar:"أنا نحب نعيش ف دزاير معاكم نتوما",tr:"ana nhab n’aich fi dzayr ma’akoum ntouma",fr:"J'aime vivre en Algérie avec vous",tts:"أَنَا نْحَبْ نْعِيشْ فِي دْزَايَرْ مْعَاكُمْ نْتُومَا",type:"phrase",lesson:9},
+            {ar:"أنا نحب نعيش ف هاد لمدينة",tr:"ana nhab n’aich f had lmdina",fr:"J'aime vivre dans cette ville",tts:"أَنَا نْحَبْ نْعِيشْ فْ هَادْ لْمْدِينَة",type:"phrase",lesson:9},
+            {ar:"أنا مانحبش نعيش ف هاد لمدينة",tr:"ana manhabech n’aich f had lmdina",fr:"Je n'aime pas vivre dans cette ville",tts:"أَنَا مَانْحَبْشْ نْعِيشْ فْ هَادْ لْمْدِينَة",type:"phrase",lesson:9},
+            {ar:"أنا نحب نخدم ف هاد لمدينة",tr:"ana nhab nekhdem f had lmdina",fr:"J'aime travailler dans cette ville",tts:"أَنَا نْحَبْ نْخْدَمْ فْ هَادْ لْمْدِينَة",type:"phrase",lesson:9},
+            {ar:"أنا مانحبش نخدم ف هاد لمدينة",tr:"ana manhabech nekhdem fi had lmdina",fr:"Je n'aime pas travailler dans cette ville",tts:"أَنَا مَانْحَبْشْ نْخْدَمْ فْ هَادْ لْمْدِينَة",type:"phrase",lesson:9},
+            {ar:"أنا مانهدرش",tr:"ana ma nahdarch",fr:"Je ne parle pas",tts:"أَنَا مَانَهْدَرْشْ",type:"phrase",lesson:9},
+            {ar:"أنا مانتعلمش",tr:"ana ma net’allamech",fr:"Je n'apprends pas",tts:"أَنَا مَانْتْعَلَّمْشْ",type:"phrase",lesson:9},
+            {ar:"أنا مانحبش",tr:"ana ma nhabech",fr:"Je n'aime pas",tts:"أَنَا مَانْحَبْشْ",type:"phrase",lesson:9},
+            {ar:"أنا مانروحش",tr:"ana ma nrouhch",fr:"Je ne vais pas",tts:"أَنَا مَانْرُوحْشْ",type:"phrase",lesson:9},
+            {ar:"أنا نعيش ف دزاير",tr:"ana n’aich fi dzayr",fr:"Je vis en Algérie",tts:"أَنَا نْعِيشْ فِي دْزَايَرْ",type:"phrase",lesson:9},
+            {ar:"أنا مانعيشش ف دزاير",tr:"ana man’aichech fi dzayr",fr:"Je ne vis pas en Algérie",tts:"أَنَا مَانْعِيشْشْ فِي دْزَايَرْ",type:"phrase",lesson:9},
+            {ar:"صباح الخير",tr:"sbah el khair",fr:"Bonjour",tts:"صَبَاحْ الْخِيرْ",type:"mot",lesson:9},
+
+            // LEÇON 10 (Nouveau)
+            {ar:"العايلة",tr:"el a’aila",fr:"La famille",tts:"الْعَايْلَة",type:"mot",lesson:10},
+            {ar:"العايلة تاعي",tr:"el a’aila ta’ai",fr:"Ma famille",tts:"الْعَايْلَة تَاعِي",type:"mot",lesson:10},
+            {ar:"أنا مانعيشش ف هاد لمدينة",tr:"ana ma n’aichech f had lemdina",fr:"Je ne vis pas dans cette ville",tts:"أَنَا مَانْعِيشْشْ فْ هَادْ لْمْدِينَة",type:"phrase",lesson:10},
+            {ar:"أنا مانحبش",tr:"ana manhabech",fr:"Je n'aime pas",tts:"أَنَا مَانْحَبْشْ",type:"phrase",lesson:10},
+            {ar:"أنا مانحبش هاد لمدينة",tr:"ana manhabech had lemdina",fr:"Je n'aime pas cette ville",tts:"أَنَا مَانْحَبْشْ هَادْ لْمْدِينَة",type:"phrase",lesson:10},
+            {ar:"أنا مانتعلمش كل يوم",tr:"ana ma nett’allamch koull youm",fr:"Je n'apprends pas tous les jours",tts:"أَنَا مَانْتْعَلَّمْشْ كُلْ يُومْ",type:"phrase",lesson:10},
+            {ar:"إنتا تتعلم كل يوم؟",tr:"enta tett’allam koull youm?",fr:"Tu apprends tous les jours ? (homme)",tts:"إِنْتَا تْتْعَلَّمْ كُلْ يُومْ؟",type:"phrase",lesson:10},
+            {ar:"لا، أنا مانتعلمش كل يوم",tr:"lla, ana ma nett’allamch koul youm",fr:"Non, je n'apprends pas tous les jours",tts:"لَا، أَنَا مَانْتْعَلَّمْشْ كُلْ يُومْ",type:"phrase",lesson:10},
+            {ar:"الخدمة تاعي",tr:"el khedma ta’ai",fr:"Mon travail",tts:"الْخَدْمَة تَاعِي",type:"phrase",lesson:10},
+            {ar:"العايلة تاعك إنتا",tr:"el a’aila ta’ak enta",fr:"Ta famille (homme)",tts:"الْعَايْلَة تَاعَكْ إِنْتَا",type:"phrase",lesson:10},
+            {ar:"العايلة تاعك إنتي",tr:"el a’aila ta’ak enti",fr:"Ta famille (femme)",tts:"الْعَايْلَة تَاعَكْ إِنْتِي",type:"phrase",lesson:10},
+            {ar:"العايلة تاعي أنا",tr:"el a’aila ta’ai ana",fr:"Ma famille à moi",tts:"الْعَايْلَة تَاعِي أَنَا",type:"phrase",lesson:10},
+            {ar:"مع العايلة تاعي أنا",tr:"ma’a el a’aila ta’ai ana",fr:"Avec ma famille",tts:"مْعَ الْعَايْلَة تَاعِي أَنَا",type:"phrase",lesson:10},
+            {ar:"أنا نعيش",tr:"ana na’aich",fr:"Je vis",tts:"أَنَا نْعِيشْ",type:"phrase",lesson:10},
+            {ar:"أنا نعيش مع العايلة تاعي",tr:"ana na’aich ma’a el a’aila ta’ai",fr:"Je vis avec ma famille",tts:"أَنَا نْعِيشْ مْعَ الْعَايْلَة تَاعِي",type:"phrase",lesson:10},
+            {ar:"أنا مانعيشش مع العايلة تاعي",tr:"ana ma na’aichech ma’a el a’aila ta’ai",fr:"Je ne vis pas avec ma famille",tts:"أَنَا مَانْعِيشْشْ مْعَ الْعَايْلَة تَاعِي",type:"phrase",lesson:10}
         ];
 
         let activeData = [];
