@@ -193,8 +193,6 @@
         #stop-all-btn { background: var(--secondary); }
         #play-all-btn { background: #005bb5; }
         .empty-state { text-align: center; color: gray; font-style: italic; padding: 20px; }
-        
-        /* Nouveau badge pour indiquer de quelle leçon vient la question */
         .lesson-badge {
             display: inline-block;
             background: #eee;
@@ -205,6 +203,25 @@
             margin-bottom: 10px;
             font-weight: normal;
         }
+        /* Style pour les notes de grammaire */
+        .grammar-note {
+            background-color: #e6f9ed;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+            font-size: 0.95em;
+        }
+        .grammar-note h3 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.1em;
+        }
+        .grammar-note ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+        .grammar-note li { margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -241,6 +258,9 @@
             <button id="play-all-btn" class="action-btn" onclick="startPlayAll()">🎧 Écouter & Répéter</button>
             <button id="stop-all-btn" class="action-btn" style="display: none;" onclick="stopPlayAll()">⏹️ Arrêter</button>
             <p style="text-align: center; font-size: 0.9em; color: gray; margin-top: 15px;"><i>(La liste affiche uniquement la leçon en cours)</i></p>
+            
+            <div id="lesson-notes"></div>
+
             <h2>Mots de base</h2>
             <div id="vocab-mots"></div>
             <h2>Phrases complètes</h2>
@@ -473,10 +493,10 @@
             {ar:"أنا مانعيشش مع العايلة تاعي",tr:"ana ma na’aichech ma’a el a’aila ta’ai",fr:"Je ne vis pas avec ma famille",tts:"أَنَا مَانْعِيشْشْ مْعَ الْعَايْلَة تَاعِي",type:"phrase",lesson:10}
         ];
 
-        let vocabData = []; // Données pour l'affichage de la leçon
-        let quizData = []; // Données cumulatives pour le quiz
-        let quizPoolTrad = []; // Paquet de cartes mélangé pour le Quiz Trad
-        let quizPoolAudio = []; // Paquet de cartes mélangé pour le Quiz Audio
+        let vocabData = []; 
+        let quizData = []; 
+        let quizPoolTrad = []; 
+        let quizPoolAudio = []; 
         
         let currentQuestion = null;
         let scoreTrad = 0, totalTrad = 0;
@@ -591,15 +611,33 @@
             stopPlayAll();
             const selector = document.getElementById('lesson-selector');
             const choice = selector.value;
+            const notesContainer = document.getElementById('lesson-notes');
+            notesContainer.innerHTML = ''; 
             
+            if (choice === "6") {
+                notesContainer.innerHTML = `
+                    <div class="grammar-note">
+                        <h3>💡 Point Grammaire : La, Lel et Fi</h3>
+                        <ul>
+                            <li><b>ف (Fi) = Dans / En (La position statique)</b><br>
+                            <i>Ex: hna nhabou neyshou <b>fi</b> dzayer (Nous aimons vivre <b>en</b> Algérie).</i></li>
+                            <li><b>لـ (La / L) = Vers / À / En (La direction)</b><br>
+                            Utilisé sans article.<br>
+                            <i>Ex: ana nroh <b>la</b> dzayer (Je vais <b>en</b> Algérie).</i></li>
+                            <li><b>للـ (Lel) = Vers le / À la (Direction avec article)</b><br>
+                            C'est la contraction de "La" (vers) + "El" (le/la).<br>
+                            <i>Ex: enti trohi <b>lel</b> a'asema (Tu vas <b>à la</b> capitale).</i></li>
+                        </ul>
+                    </div>
+                `;
+            }
+
             if (choice === "all") {
                 vocabData = [...allLessonData];
                 quizData = [...allLessonData];
             } else {
                 const lessonNum = parseInt(choice);
-                // Le Vocabulaire affiche SEULEMENT la leçon en cours
                 vocabData = allLessonData.filter(item => item.lesson === lessonNum);
-                // Le Quiz inclut TOUTES les leçons depuis la Leçon 1 jusqu'à la leçon choisie (Cumulatif)
                 quizData = allLessonData.filter(item => item.lesson <= lessonNum);
             }
             
@@ -642,7 +680,6 @@
 
         function getOptions(correctItem) {
             let options = [correctItem];
-            // Les mauvaises réponses sont piochées dans toute la base de données
             let distractors = allLessonData.filter(item => item.type === correctItem.type && item !== correctItem);
             distractors.sort(() => Math.random() - 0.5);
             if (distractors.length > 0) options.push(distractors[0]);
@@ -650,11 +687,9 @@
             return options.sort(() => Math.random() - 0.5);
         }
 
-        // --- GESTION DU QUIZ TEXTE ---
         function startTradQuiz() {
             scoreTrad = 0; totalTrad = 0;
             updateScore('trad', scoreTrad, totalTrad);
-            // On mélange tout le paquet de cartes (questions)
             quizPoolTrad = [...quizData].sort(() => Math.random() - 0.5);
             nextTradQuestion();
         }
@@ -663,12 +698,10 @@
             document.getElementById('next-btn-trad').style.display = 'none';
             if(quizData.length === 0) return;
             
-            // Si on a épuisé le paquet, on le re-mélange
             if (quizPoolTrad.length === 0) {
                 quizPoolTrad = [...quizData].sort(() => Math.random() - 0.5);
             }
             
-            // On tire la question du haut du paquet
             currentQuestion = quizPoolTrad.pop();
             
             let badgeHtml = document.getElementById('lesson-selector').value !== "all" 
@@ -687,11 +720,9 @@
             });
         }
 
-        // --- GESTION DU QUIZ AUDIO ---
         function startAudioQuiz() {
             scoreAudio = 0; totalAudio = 0;
             updateScore('audio', scoreAudio, totalAudio);
-            // On mélange tout le paquet de cartes (questions)
             quizPoolAudio = [...quizData].sort(() => Math.random() - 0.5);
             nextAudioQuestion();
         }
@@ -700,12 +731,10 @@
             document.getElementById('next-btn-audio').style.display = 'none';
             if(quizData.length === 0) return;
 
-            // Si on a épuisé le paquet, on le re-mélange
             if (quizPoolAudio.length === 0) {
                 quizPoolAudio = [...quizData].sort(() => Math.random() - 0.5);
             }
             
-            // On tire la question du haut du paquet
             currentQuestion = quizPoolAudio.pop();
             
             let badgeHtml = document.getElementById('lesson-selector').value !== "all" 
