@@ -70,7 +70,7 @@
         }
         .tabs {
             display: flex;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-bottom: 2px solid var(--primary);
             flex-wrap: wrap;
         }
@@ -134,6 +134,32 @@
             -webkit-tap-highlight-color: transparent;
         }
         button.audio-btn:active { opacity: 0.7; }
+        
+        /* Nouveau style pour le mode révision */
+        #revision-toggle-container {
+            background: var(--highlight);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid var(--primary);
+            display: none;
+        }
+        .toggle-label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.95em;
+        }
+        .toggle-label input {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
         .question-text {
             font-size: 1.2em;
             margin-bottom: 20px;
@@ -195,17 +221,16 @@
         .empty-state { text-align: center; color: gray; font-style: italic; padding: 20px; }
         .lesson-badge {
             display: inline-block;
-            background: #eee;
-            color: #666;
+            background: #e0e0e0;
+            color: #555;
             font-size: 0.7em;
             padding: 3px 8px;
             border-radius: 12px;
             margin-bottom: 10px;
             font-weight: normal;
         }
-        /* Style pour les notes de grammaire */
         .grammar-note {
-            background-color: #e6f9ed;
+            background-color: var(--highlight);
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -217,10 +242,7 @@
             color: var(--primary);
             font-size: 1.1em;
         }
-        .grammar-note ul {
-            padding-left: 20px;
-            margin-bottom: 0;
-        }
+        .grammar-note ul { padding-left: 20px; margin-bottom: 0; }
         .grammar-note li { margin-bottom: 8px; }
     </style>
 </head>
@@ -245,13 +267,20 @@
             <option value="3">📖 Leçon 3</option>
             <option value="2">📖 Leçon 2</option>
             <option value="1">📖 Leçon 1</option>
-            <option value="all">📚 Toutes les leçons</option>
+            <option value="all">📚 Examen Global (Toutes les leçons)</option>
         </select>
 
         <div class="tabs">
-            <div class="tab active" onclick="showSection('vocab')">Vocabulaire</div>
-            <div class="tab" onclick="showSection('quiz-trad')">Quiz Texte</div>
-            <div class="tab" onclick="showSection('quiz-audio')">Quiz Audio</div>
+            <div class="tab active" onclick="showSection('vocab', this)">Vocabulaire</div>
+            <div class="tab" onclick="showSection('quiz-trad', this)">Quiz Texte</div>
+            <div class="tab" onclick="showSection('quiz-audio', this)">Quiz Audio</div>
+        </div>
+
+        <div id="revision-toggle-container">
+            <label class="toggle-label">
+                <input type="checkbox" id="revision-toggle" onchange="changeLesson()">
+                🔄 Activer la révision des leçons précédentes
+            </label>
         </div>
 
         <div id="vocab" class="section active">
@@ -611,21 +640,20 @@
             stopPlayAll();
             const selector = document.getElementById('lesson-selector');
             const choice = selector.value;
+            const isRevisionMode = document.getElementById('revision-toggle').checked;
             const notesContainer = document.getElementById('lesson-notes');
             notesContainer.innerHTML = ''; 
             
             if (choice === "6") {
                 notesContainer.innerHTML = `
                     <div class="grammar-note">
-                        <h3>💡 Point Grammaire : La, Lel et Fi</h3>
+                        <h3>💡 Grammaire : La, Lel et Fi</h3>
                         <ul>
-                            <li><b>ف (Fi) = Dans / En (La position statique)</b><br>
+                            <li><b>ف (Fi) = Dans / En (Statique)</b><br>
                             <i>Ex: hna nhabou neyshou <b>fi</b> dzayer (Nous aimons vivre <b>en</b> Algérie).</i></li>
-                            <li><b>لـ (La / L) = Vers / À / En (La direction)</b><br>
-                            Utilisé sans article.<br>
+                            <li><b>لـ (La / L) = Vers / En (Mouvement, sans article)</b><br>
                             <i>Ex: ana nroh <b>la</b> dzayer (Je vais <b>en</b> Algérie).</i></li>
-                            <li><b>للـ (Lel) = Vers le / À la (Direction avec article)</b><br>
-                            C'est la contraction de "La" (vers) + "El" (le/la).<br>
+                            <li><b>للـ (Lel) = Vers le / À la (Mouvement, avec article)</b><br>
                             <i>Ex: enti trohi <b>lel</b> a'asema (Tu vas <b>à la</b> capitale).</i></li>
                         </ul>
                     </div>
@@ -635,22 +663,45 @@
             if (choice === "all") {
                 vocabData = [...allLessonData];
                 quizData = [...allLessonData];
+                document.getElementById('revision-toggle-container').style.display = 'none';
             } else {
                 const lessonNum = parseInt(choice);
                 vocabData = allLessonData.filter(item => item.lesson === lessonNum);
-                quizData = allLessonData.filter(item => item.lesson <= lessonNum);
+                
+                // Si la révision est cochée, on inclut les anciennes leçons dans le quiz
+                if (isRevisionMode) {
+                    quizData = allLessonData.filter(item => item.lesson <= lessonNum);
+                } else {
+                    quizData = allLessonData.filter(item => item.lesson === lessonNum);
+                }
             }
             
+            // Mise à jour de l'affichage de l'interrupteur selon l'onglet actif
+            const activeSection = document.querySelector('.section.active').id;
+            if (activeSection.startsWith('quiz') && choice !== "all" && parseInt(choice) > 1) {
+                document.getElementById('revision-toggle-container').style.display = 'block';
+            } else {
+                document.getElementById('revision-toggle-container').style.display = 'none';
+            }
+
             renderVocab();
             startTradQuiz();
             startAudioQuiz();
         }
 
-        function showSection(sectionId) {
+        function showSection(sectionId, element) {
             document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
-            event.target.classList.add('active');
+            if (element) element.classList.add('active');
+
+            const choice = document.getElementById('lesson-selector').value;
+            // On n'affiche le bouton Révision que dans les onglets de Quiz (et pas pour la Leçon 1 ou "All")
+            if (sectionId.startsWith('quiz') && choice !== "all" && parseInt(choice) > 1) {
+                document.getElementById('revision-toggle-container').style.display = 'block';
+            } else {
+                document.getElementById('revision-toggle-container').style.display = 'none';
+            }
         }
 
         function renderVocab() {
@@ -678,9 +729,19 @@
             if(!hasPhrases) listPhrases.innerHTML = "<div class='empty-state'>Aucune phrase à afficher.</div>";
         }
 
+        // Modifié : Ne propose comme faux choix QUE des mots que tu as déjà appris !
         function getOptions(correctItem) {
             let options = [correctItem];
-            let distractors = allLessonData.filter(item => item.type === correctItem.type && item !== correctItem);
+            let maxLesson = document.getElementById('lesson-selector').value;
+            let pool = [];
+            
+            if (maxLesson === "all") {
+                pool = allLessonData;
+            } else {
+                pool = allLessonData.filter(item => item.lesson <= parseInt(maxLesson));
+            }
+            
+            let distractors = pool.filter(item => item.type === correctItem.type && item !== correctItem);
             distractors.sort(() => Math.random() - 0.5);
             if (distractors.length > 0) options.push(distractors[0]);
             if (distractors.length > 1) options.push(distractors[1]);
@@ -704,7 +765,8 @@
             
             currentQuestion = quizPoolTrad.pop();
             
-            let badgeHtml = document.getElementById('lesson-selector').value !== "all" 
+            // Indique de quelle leçon vient la question si le mode révision est activé
+            let badgeHtml = (document.getElementById('revision-toggle').checked && document.getElementById('lesson-selector').value !== "all") 
                             ? `<span class="lesson-badge">Extrait de la Leçon ${currentQuestion.lesson}</span><br>` : "";
                             
             document.getElementById('question-trad').innerHTML = `${badgeHtml}Traduisez :<br><span style="color:var(--primary); font-size:1.3em;">"${currentQuestion.fr}"</span>`;
@@ -737,7 +799,7 @@
             
             currentQuestion = quizPoolAudio.pop();
             
-            let badgeHtml = document.getElementById('lesson-selector').value !== "all" 
+            let badgeHtml = (document.getElementById('revision-toggle').checked && document.getElementById('lesson-selector').value !== "all") 
                             ? `<span class="lesson-badge">Audio de la Leçon ${currentQuestion.lesson}</span>` : "";
             document.getElementById('audio-badge').innerHTML = badgeHtml;
 
