@@ -193,6 +193,18 @@
         #stop-all-btn { background: var(--secondary); }
         #play-all-btn { background: #005bb5; }
         .empty-state { text-align: center; color: gray; font-style: italic; padding: 20px; }
+        
+        /* Nouveau badge pour indiquer de quelle leçon vient la question */
+        .lesson-badge {
+            display: inline-block;
+            background: #eee;
+            color: #666;
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
@@ -206,8 +218,8 @@
 
     <div class="container" id="main-app">
         <select id="lesson-selector" onchange="changeLesson()">
-            <option value="10">📖 Leçon 10 (Nouveau !)</option>
-            <option value="9">📖 Leçon 9 (Nouveau !)</option>
+            <option value="10">📖 Leçon 10</option>
+            <option value="9">📖 Leçon 9</option>
             <option value="8">📖 Leçon 8</option>
             <option value="7">📖 Leçon 7</option>
             <option value="6">📖 Leçon 6</option>
@@ -228,7 +240,7 @@
         <div id="vocab" class="section active">
             <button id="play-all-btn" class="action-btn" onclick="startPlayAll()">🎧 Écouter & Répéter</button>
             <button id="stop-all-btn" class="action-btn" style="display: none;" onclick="stopPlayAll()">⏹️ Arrêter</button>
-            <p style="text-align: center; font-size: 0.9em; color: gray; margin-top: 15px;"><i>Clique sur l'icône 🔊 pour écouter un mot précis.</i></p>
+            <p style="text-align: center; font-size: 0.9em; color: gray; margin-top: 15px;"><i>(La liste affiche uniquement la leçon en cours)</i></p>
             <h2>Mots de base</h2>
             <div id="vocab-mots"></div>
             <h2>Phrases complètes</h2>
@@ -245,6 +257,7 @@
         <div id="quiz-audio" class="section">
             <div class="question-text">
                 <button class="big-audio-btn" onclick="playCurrentAudio()" title="Écouter">🔊</button>
+                <div id="audio-badge"></div>
                 Écoute et choisis la bonne traduction :
             </div>
             <div class="options" id="options-audio"></div>
@@ -419,7 +432,6 @@
             {ar:"أنا نتعلم معاك نتي",tr:"ana nata'alam ma'ak enti",fr:"J'apprends avec toi (femme)",tts:"أَنَا نْتْعَلَّمْ مْعَاكْ نْتِي",type:"phrase",lesson:8},
             {ar:"أنا نتعلم معاك نتي كل يوم",tr:"ana nata'alam ma'ak enti koul youm",fr:"J'apprends avec toi tous les jours (femme)",tts:"أَنَا نْتْعَلَّمْ مْعَاكْ نْتِي كُلْ يُومْ",type:"phrase",lesson:8},
 
-            // LEÇON 9 (Nouveau)
             {ar:"معاك نتا",tr:"ma'ak enta",fr:"Avec toi (homme)",tts:"مْعَاكْ نْتَا",type:"mot",lesson:9},
             {ar:"معاكم نتوما",tr:"ma'akoum ntouma",fr:"Avec vous",tts:"مْعَاكُمْ نْتُومَا",type:"mot",lesson:9},
             {ar:"كل عام",tr:"koul a'am",fr:"Chaque année",tts:"كُلْ عَامْ",type:"mot",lesson:9},
@@ -443,7 +455,6 @@
             {ar:"أنا مانعيشش ف دزاير",tr:"ana man’aichech fi dzayr",fr:"Je ne vis pas en Algérie",tts:"أَنَا مَانْعِيشْشْ فِي دْزَايَرْ",type:"phrase",lesson:9},
             {ar:"صباح الخير",tr:"sbah el khair",fr:"Bonjour",tts:"صَبَاحْ الْخِيرْ",type:"mot",lesson:9},
 
-            // LEÇON 10 (Nouveau)
             {ar:"العايلة",tr:"el a’aila",fr:"La famille",tts:"الْعَايْلَة",type:"mot",lesson:10},
             {ar:"العايلة تاعي",tr:"el a’aila ta’ai",fr:"Ma famille",tts:"الْعَايْلَة تَاعِي",type:"mot",lesson:10},
             {ar:"أنا مانعيشش ف هاد لمدينة",tr:"ana ma n’aichech f had lemdina",fr:"Je ne vis pas dans cette ville",tts:"أَنَا مَانْعِيشْشْ فْ هَادْ لْمْدِينَة",type:"phrase",lesson:10},
@@ -462,7 +473,11 @@
             {ar:"أنا مانعيشش مع العايلة تاعي",tr:"ana ma na’aichech ma’a el a’aila ta’ai",fr:"Je ne vis pas avec ma famille",tts:"أَنَا مَانْعِيشْشْ مْعَ الْعَايْلَة تَاعِي",type:"phrase",lesson:10}
         ];
 
-        let activeData = [];
+        let vocabData = []; // Données pour l'affichage de la leçon
+        let quizData = []; // Données cumulatives pour le quiz
+        let quizPoolTrad = []; // Paquet de cartes mélangé pour le Quiz Trad
+        let quizPoolAudio = []; // Paquet de cartes mélangé pour le Quiz Audio
+        
         let currentQuestion = null;
         let scoreTrad = 0, totalTrad = 0;
         let scoreAudio = 0, totalAudio = 0;
@@ -474,17 +489,14 @@
         const audioPlayer = document.getElementById('audio-player');
 
         function initApp() {
-            audioPlayer.play().catch(e => console.log("Init audio player silent error"));
+            audioPlayer.play().catch(e => console.log("Init silent error"));
             audioPlayer.pause();
-            
             if ('speechSynthesis' in window) {
                 let msg = new SpeechSynthesisUtterance('');
                 window.speechSynthesis.speak(msg);
             }
-
             document.getElementById('start-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            
             changeLesson();
         }
 
@@ -492,7 +504,6 @@
             stopPlayAll(); 
             audioPlayer.onended = null;
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(ttsText)}`;
-            
             audioPlayer.src = url;
             audioPlayer.play().catch(error => {
                 if ('speechSynthesis' in window) {
@@ -509,13 +520,11 @@
         }
 
         function startPlayAll() {
-            if(activeData.length === 0) return;
+            if(vocabData.length === 0) return;
             isPlayingAll = true;
             playIndex = 0;
-            
             document.getElementById('play-all-btn').style.display = 'none';
             document.getElementById('stop-all-btn').style.display = 'block';
-            
             playSequence();
         }
 
@@ -525,38 +534,27 @@
             audioPlayer.pause();
             if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             clearTimeout(sequenceTimeout);
-            
             document.getElementById('play-all-btn').style.display = 'block';
             document.getElementById('stop-all-btn').style.display = 'none';
-            
             document.querySelectorAll('.vocab-item').forEach(el => el.classList.remove('highlight'));
         }
 
         function speakWord(text, lang, callback) {
             if (!isPlayingAll) return;
-
             const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodeURIComponent(text)}`;
             audioPlayer.src = url;
-            
             audioPlayer.onended = function() {
                 audioPlayer.onended = null;
                 if (callback) callback();
             };
-
             audioPlayer.play().catch(error => {
                 audioPlayer.onended = null;
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     let utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = lang === 'fr' ? 'fr-FR' : 'ar-SA';
-                    
-                    utterance.onend = function() {
-                        if (callback) callback();
-                    };
-                    utterance.onerror = function() {
-                        if (callback) callback(); 
-                    };
-                    
+                    utterance.onend = function() { if (callback) callback(); };
+                    utterance.onerror = function() { if (callback) callback(); };
                     window.speechSynthesis.speak(utterance);
                 } else {
                     stopPlayAll();
@@ -565,26 +563,21 @@
         }
 
         function playSequence() {
-            if (!isPlayingAll || playIndex >= activeData.length) {
+            if (!isPlayingAll || playIndex >= vocabData.length) {
                 stopPlayAll();
                 return;
             }
-
             document.querySelectorAll('.vocab-item').forEach(el => el.classList.remove('highlight'));
             let currentElement = document.getElementById('vocab-item-' + playIndex);
             if(currentElement) {
                 currentElement.classList.add('highlight');
                 currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-
-            let currentItem = activeData[playIndex];
-            
+            let currentItem = vocabData[playIndex];
             speakWord(currentItem.fr, 'fr', function() {
                 if (!isPlayingAll) return;
-                
                 speakWord(currentItem.tts, 'ar', function() {
                     if (!isPlayingAll) return;
-                    
                     let pauseTime = Math.max(2000, currentItem.tts.length * 120); 
                     sequenceTimeout = setTimeout(() => {
                         playIndex++;
@@ -598,11 +591,18 @@
             stopPlayAll();
             const selector = document.getElementById('lesson-selector');
             const choice = selector.value;
+            
             if (choice === "all") {
-                activeData = [...allLessonData];
+                vocabData = [...allLessonData];
+                quizData = [...allLessonData];
             } else {
-                activeData = allLessonData.filter(item => item.lesson == choice);
+                const lessonNum = parseInt(choice);
+                // Le Vocabulaire affiche SEULEMENT la leçon en cours
+                vocabData = allLessonData.filter(item => item.lesson === lessonNum);
+                // Le Quiz inclut TOUTES les leçons depuis la Leçon 1 jusqu'à la leçon choisie (Cumulatif)
+                quizData = allLessonData.filter(item => item.lesson <= lessonNum);
             }
+            
             renderVocab();
             startTradQuiz();
             startAudioQuiz();
@@ -619,15 +619,12 @@
             const listMots = document.getElementById('vocab-mots');
             const listPhrases = document.getElementById('vocab-phrases');
             listMots.innerHTML = ''; listPhrases.innerHTML = '';
-            
-            let hasMots = false;
-            let hasPhrases = false;
+            let hasMots = false, hasPhrases = false;
 
-            activeData.forEach((item, index) => {
+            vocabData.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'vocab-item';
                 div.id = 'vocab-item-' + index;
-                
                 div.innerHTML = `
                     <div class="vocab-text">
                         <span class="arabe">${item.ar}</span>
@@ -635,21 +632,17 @@
                     </div>
                     <button class="audio-btn" onclick="playAudio('${item.tts}')" title="Écouter">🔊</button>
                 `;
-                if (item.type === 'mot') {
-                    listMots.appendChild(div);
-                    hasMots = true;
-                } else {
-                    listPhrases.appendChild(div);
-                    hasPhrases = true;
-                }
+                if (item.type === 'mot') { listMots.appendChild(div); hasMots = true; } 
+                else { listPhrases.appendChild(div); hasPhrases = true; }
             });
 
-            if(!hasMots) listMots.innerHTML = "<div class='empty-state'>Aucun mot simple dans cette sélection.</div>";
-            if(!hasPhrases) listPhrases.innerHTML = "<div class='empty-state'>Aucune phrase dans cette sélection.</div>";
+            if(!hasMots) listMots.innerHTML = "<div class='empty-state'>Aucun mot simple à afficher.</div>";
+            if(!hasPhrases) listPhrases.innerHTML = "<div class='empty-state'>Aucune phrase à afficher.</div>";
         }
 
         function getOptions(correctItem) {
             let options = [correctItem];
+            // Les mauvaises réponses sont piochées dans toute la base de données
             let distractors = allLessonData.filter(item => item.type === correctItem.type && item !== correctItem);
             distractors.sort(() => Math.random() - 0.5);
             if (distractors.length > 0) options.push(distractors[0]);
@@ -657,18 +650,31 @@
             return options.sort(() => Math.random() - 0.5);
         }
 
+        // --- GESTION DU QUIZ TEXTE ---
         function startTradQuiz() {
             scoreTrad = 0; totalTrad = 0;
             updateScore('trad', scoreTrad, totalTrad);
+            // On mélange tout le paquet de cartes (questions)
+            quizPoolTrad = [...quizData].sort(() => Math.random() - 0.5);
             nextTradQuestion();
         }
 
         function nextTradQuestion() {
             document.getElementById('next-btn-trad').style.display = 'none';
-            if(activeData.length === 0) return;
+            if(quizData.length === 0) return;
             
-            currentQuestion = activeData[Math.floor(Math.random() * activeData.length)];
-            document.getElementById('question-trad').innerHTML = `Traduisez :<br><span style="color:var(--primary); font-size:1.3em;">"${currentQuestion.fr}"</span>`;
+            // Si on a épuisé le paquet, on le re-mélange
+            if (quizPoolTrad.length === 0) {
+                quizPoolTrad = [...quizData].sort(() => Math.random() - 0.5);
+            }
+            
+            // On tire la question du haut du paquet
+            currentQuestion = quizPoolTrad.pop();
+            
+            let badgeHtml = document.getElementById('lesson-selector').value !== "all" 
+                            ? `<span class="lesson-badge">Extrait de la Leçon ${currentQuestion.lesson}</span><br>` : "";
+                            
+            document.getElementById('question-trad').innerHTML = `${badgeHtml}Traduisez :<br><span style="color:var(--primary); font-size:1.3em;">"${currentQuestion.fr}"</span>`;
             
             const container = document.getElementById('options-trad');
             container.innerHTML = '';
@@ -681,17 +687,31 @@
             });
         }
 
+        // --- GESTION DU QUIZ AUDIO ---
         function startAudioQuiz() {
             scoreAudio = 0; totalAudio = 0;
             updateScore('audio', scoreAudio, totalAudio);
+            // On mélange tout le paquet de cartes (questions)
+            quizPoolAudio = [...quizData].sort(() => Math.random() - 0.5);
             nextAudioQuestion();
         }
 
         function nextAudioQuestion() {
             document.getElementById('next-btn-audio').style.display = 'none';
-            if(activeData.length === 0) return;
+            if(quizData.length === 0) return;
 
-            currentQuestion = activeData[Math.floor(Math.random() * activeData.length)];
+            // Si on a épuisé le paquet, on le re-mélange
+            if (quizPoolAudio.length === 0) {
+                quizPoolAudio = [...quizData].sort(() => Math.random() - 0.5);
+            }
+            
+            // On tire la question du haut du paquet
+            currentQuestion = quizPoolAudio.pop();
+            
+            let badgeHtml = document.getElementById('lesson-selector').value !== "all" 
+                            ? `<span class="lesson-badge">Audio de la Leçon ${currentQuestion.lesson}</span>` : "";
+            document.getElementById('audio-badge').innerHTML = badgeHtml;
+
             const container = document.getElementById('options-audio');
             container.innerHTML = '';
             getOptions(currentQuestion).forEach(opt => {
